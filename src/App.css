@@ -107,24 +107,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 100px 10% 0;
-  /* Added top padding to shift content down */
+  padding: 60px 10% 0;
+  /* Reduced top padding to move it back up */
   position: relative;
 }
 
 .hero-content {
   flex: 1;
   z-index: 1;
-  margin-top: 40px;
-  /* Slight extra push for the text */
+  margin-top: 10px;
+  /* Reduced margin to move text up */
 }
 
 .hero-visual {
   flex: 1;
   height: 100%;
   position: absolute;
-  top: 40px;
-  /* Shifted the whole visual container down */
+  top: 10px;
+  /* Reduced top offset to move image up */
   right: 0;
   width: 50%;
   padding: 5%;
