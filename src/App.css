@@ -1,7 +1,149 @@
 .app {
   position: relative;
   min-height: 100vh;
+  background: transparent;
 }
+
+/* Cosmic Background */
+.cosmic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #020617;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(253, 16%, 15%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 10%, hsla(225, 39%, 20%, 0.2) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(280, 49%, 20%, 0.15) 0, transparent 50%),
+    radial-gradient(at 80% 80%, hsla(210, 50%, 15%, 0.2) 0, transparent 50%);
+}
+
+@keyframes cosmic-pan {
+  from {
+    transform: translateX(-2%) translateY(-1%);
+  }
+
+  to {
+    transform: translateX(2%) translateY(1%);
+  }
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px white;
+  filter: blur(0.2px);
+  animation: twinkle var(--duration, 3s) infinite ease-in-out;
+}
+
+.constellation-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: inset -20px -20px 40px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 0 20px var(--primary));
+  opacity: 0.9;
+  animation: planet-revolve var(--rev-duration, 40s) infinite linear;
+  animation-delay: var(--rev-delay, 0s);
+}
+
+@keyframes planet-revolve {
+  0% {
+    transform: translateX(-20vw);
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 1;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(120vw);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(120vw);
+    opacity: 0;
+  }
+}
+
+.planet-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateX(75deg);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.asteroid {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  z-index: 0;
+  animation: falling-asteroid var(--duration, 5s) infinite linear;
+  box-shadow: 0 0 10px #fff, 0 0 20px #f97316;
+}
+
+.asteroid-trail {
+  position: absolute;
+  bottom: 50%;
+  /* Start behind the head */
+  left: 50%;
+  width: 2px;
+  height: 120px;
+  background: linear-gradient(to top, #f97316, transparent);
+  transform: translateX(-50%) rotate(var(--trail-angle, 0deg));
+  transform-origin: bottom center;
+  filter: blur(1.5px);
+}
+
+@keyframes falling-asteroid {
+  0% {
+    transform: translate(var(--start-x), -120px);
+    opacity: 0;
+  }
+
+  0.2% {
+    opacity: 1;
+  }
+
+  1.8% {
+    opacity: 1;
+  }
+
+  2% {
+    transform: translate(var(--end-x), 110vh);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translate(var(--end-x), 110vh);
+    opacity: 0;
+  }
+}
+
+/* App structure */
 
 .grain-overlay {
   position: fixed;
@@ -20,6 +162,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Navbar */
@@ -55,20 +199,98 @@
   gap: 0.8rem;
   font-family: 'Outfit', sans-serif;
   letter-spacing: 4px;
+  cursor: pointer;
 }
 
-.logo-initial {
-  width: 32px;
-  height: 32px;
-  background: var(--primary);
+.logo-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-weight: 800;
-  color: white;
-  font-size: 1.2rem;
-  letter-spacing: 0;
+  transition: filter 0.3s ease;
+}
+
+.logo-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px var(--primary));
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+.nav-logo:hover .logo-icon {
+  filter: drop-shadow(0 0 15px var(--primary));
+}
+
+.nav-logo span,
+.footer-logo span {
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-logo:hover span::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent);
+  animation: logo-shimmer 1.5s infinite;
+}
+
+@keyframes logo-shimmer {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px var(--primary));
+    opacity: 1;
+  }
+
+  50% {
+    filter: drop-shadow(0 0 15px var(--primary));
+    opacity: 0.8;
+  }
+}
+
+.footer {
+  padding: 4rem 2rem;
+  border-top: 1px solid var(--glass-border);
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 4px;
 }
 
 .text-white {
@@ -110,6 +332,7 @@
   padding: 60px 10% 0;
   /* Reduced top padding to move it back up */
   position: relative;
+  z-index: 1;
 }
 
 .hero-content {
@@ -669,6 +892,8 @@ section {
 .footer {
   padding: 4rem 2rem;
   border-top: 1px solid var(--glass-border);
+  position: relative;
+  z-index: 1;
 }
 
 .footer-content {
@@ -692,27 +917,37 @@ section {
   font-size: 0.9rem;
 }
 
-/* Custom Cursor */
-.cursor-dot {
+/* Custom Cursor - Spaceship & Alien Trail */
+.cursor-spaceship {
   position: fixed;
-  width: 8px;
-  height: 8px;
-  background-color: var(--primary);
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   pointer-events: none;
-  z-index: 10000;
-  transition: background-color 0.3s;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 8px var(--primary));
+  transition: transform 0.1s ease-out;
 }
 
-.cursor-ring {
+.cursor-alien-trail {
   position: fixed;
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--text-muted);
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   pointer-events: none;
   z-index: 10000;
-  transition: border-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  filter: drop-shadow(0 0 10px var(--accent));
+}
+
+.cursor-dot,
+.cursor-ring {
+  display: none;
+  /* Hide old cursor parts */
 }
 
 /* Theme Switcher */
