@@ -183,7 +183,9 @@ const CosmicBackground = () => {
           '--rev-duration': '130s',
           '--rev-delay': '-10s'
         } as any}
-      />
+      >
+        <div className="moon" />
+      </div>
 
       {/* Saturn-like Planet */}
       <div
