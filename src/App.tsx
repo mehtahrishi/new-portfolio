@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, isValidElement } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Twitter, Mail, Code2, Globe, Zap, ArrowRight, ChevronDown, Rocket, Orbit, Database, Brain, Server, Palette } from 'lucide-react';
+import { Code2, Zap, ArrowRight, ChevronDown, Rocket, Database, Brain, Server, Palette, Shield, Cloud, X, FolderArchive } from 'lucide-react';
 import { GoCopilot } from "react-icons/go";
 import { FaCss3Alt, FaAws } from "react-icons/fa";
 import { IoLogoJavascript, IoFlash } from "react-icons/io5";
@@ -603,6 +603,7 @@ const CustomCursor = () => {
   const [trailPos, setTrailPos] = useState({ x: window.innerWidth - 60, y: window.innerHeight - 60 });
   const [isHovering, setIsHovering] = useState(false);
   const [isInGame, setIsInGame] = useState(false);
+  const [isTerminal, setIsTerminal] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const timeoutRef = useRef<number | null>(null);
@@ -630,6 +631,7 @@ const CustomCursor = () => {
       const target = e.target as HTMLElement;
       setIsHovering(!!target.closest('button, a, .stack-card, .timeline-item, .edu-card, .cert-tag'));
       setIsInGame(!!target.closest('.game-wrapper'));
+      setIsTerminal(!!target.closest('.terminal-container'));
     };
 
     window.addEventListener('mousemove', moveCursor);
@@ -649,8 +651,8 @@ const CustomCursor = () => {
           x: position.x - 16,
           y: position.y - 16,
           rotate: rotation,
-          scale: isHovering ? 1.4 : 1,
-          opacity: isInGame ? 0 : 1,
+          scale: (isTerminal || isInGame) ? 0 : (isHovering ? 1.4 : 1),
+          opacity: (isTerminal || isInGame) ? 0 : 1,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 500, mass: 0.2 }}
         style={{ pointerEvents: 'none' }}
@@ -663,8 +665,8 @@ const CustomCursor = () => {
         animate={{
           x: isMoving ? trailPos.x - 10 : window.innerWidth - 60,
           y: isMoving ? trailPos.y + 20 : window.innerHeight - 60,
-          scale: isMoving ? (isHovering ? 1.2 : 0.9) : 0,
-          opacity: (isMoving && !isInGame) ? 0.8 : 0,
+          scale: (isTerminal || isInGame) ? 0 : (isMoving ? (isHovering ? 1.2 : 0.9) : 0),
+          opacity: (isMoving && !isTerminal && !isInGame) ? 0.8 : 0,
         }}
         transition={{ type: 'spring', damping: 15, stiffness: 80, mass: 0.5 }}
         style={{ pointerEvents: 'none' }}
@@ -749,7 +751,7 @@ const Navbar = () => {
             whileHover={{ rotate: 360, transition: { duration: 8, repeat: Infinity, ease: "linear" } }}
             className="logo-icon-container"
           >
-            <Orbit className="logo-icon" size={24} />
+            <Zap className="logo-icon" size={24} />
           </motion.div>
           <motion.span
             whileHover={{ x: 5, color: 'var(--primary)' }}
@@ -818,7 +820,7 @@ const Hero = () => {
   );
 };
 
-const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40 }: { name: string; icon: any; color: string; size?: number }) => {
+const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { name: string; icon: any; color: string; size?: number, delay?: number }) => {
   const [imgError, setImgError] = useState(false);
 
   // Mapping names to Simple Icons slugs
@@ -872,7 +874,23 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40 }: { name: strin
   return (
     <motion.div
       className="skill-icon-wrap"
-      whileHover={{ scale: 1.2 }}
+      initial={{ scale: 0, opacity: 0, y: 20, filter: "blur(10px) brightness(0)" }}
+      whileInView={{
+        scale: [0, 1.3, 1],
+        opacity: 1,
+        y: 0,
+        filter: ["blur(10px) brightness(2)", "blur(0px) brightness(1)"],
+        transition: {
+          delay: delay,
+          duration: 0.8,
+          times: [0, 0.6, 1],
+          type: "spring",
+          stiffness: 260,
+          damping: 20
+        }
+      }}
+      viewport={{ once: true }}
+      whileHover={{ scale: 1.2, transition: { delay: 0 } }}
       style={{ color } as any}
     >
       {renderIcon()}
@@ -968,14 +986,50 @@ const SkillsSection = () => {
                         const half = Math.ceil(cat.items.length / 2);
                         const left = cat.items.slice(0, half);
                         const right = cat.items.slice(half);
+                        const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
+
                         return left.map((item, idx) => (
                           <div key={item} style={{ display: 'contents' }}>
-                            <SkillIcon name={item} icon={cat.icon} color={cat.color} size={24} />
-                            <span className="skill-label">{item}</span>
+                            <SkillIcon
+                              name={item}
+                              icon={cat.icon}
+                              color={cat.color}
+                              size={24}
+                              delay={baseDelay + (idx * 0.1)}
+                            />
+                            <motion.span
+                              className="skill-label"
+                              initial={{ opacity: 0, x: -10 }}
+                              whileInView={{
+                                opacity: 1,
+                                x: 0,
+                                transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
+                              }}
+                              viewport={{ once: true }}
+                            >
+                              {item}
+                            </motion.span>
                             {right[idx] ? (
                               <>
-                                <span className="skill-label text-right">{right[idx]}</span>
-                                <SkillIcon name={right[idx]} icon={cat.icon} color={cat.color} size={24} />
+                                <motion.span
+                                  className="skill-label text-right"
+                                  initial={{ opacity: 0, x: 10 }}
+                                  whileInView={{
+                                    opacity: 1,
+                                    x: 0,
+                                    transition: { delay: baseDelay + ((cat.items.length - 1 - idx) * 0.1) + 0.1 }
+                                  }}
+                                  viewport={{ once: true }}
+                                >
+                                  {right[idx]}
+                                </motion.span>
+                                <SkillIcon
+                                  name={right[idx]}
+                                  icon={cat.icon}
+                                  color={cat.color}
+                                  size={24}
+                                  delay={baseDelay + ((cat.items.length - 1 - idx) * 0.1)}
+                                />
                               </>
                             ) : (
                               <><div /><div /></>
@@ -987,12 +1041,32 @@ const SkillsSection = () => {
                   </div>
                 ) : (
                   <div className="asteroid-cluster list-cluster">
-                    {cat.items.map((item) => (
-                      <div key={item} className="skill-list-item">
-                        <SkillIcon name={item} icon={cat.icon} color={cat.color} size={28} />
-                        <span className="skill-label">{item}</span>
-                      </div>
-                    ))}
+                    {cat.items.map((item, idx) => {
+                      const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
+                      return (
+                        <div key={item} className="skill-list-item">
+                          <SkillIcon
+                            name={item}
+                            icon={cat.icon}
+                            color={cat.color}
+                            size={28}
+                            delay={baseDelay + (idx * 0.1)}
+                          />
+                          <motion.span
+                            className="skill-label"
+                            initial={{ opacity: 0, x: 10 }}
+                            whileInView={{
+                              opacity: 1,
+                              x: 0,
+                              transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
+                            }}
+                            viewport={{ once: true }}
+                          >
+                            {item}
+                          </motion.span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1012,24 +1086,186 @@ const SkillsSection = () => {
 const ExperienceSection = () => {
   const experiences = [
     {
-      company: "Quantum Solutions",
-      role: "Lead Interface Architect",
-      period: "2023 - Present",
-      desc: "Architecting complex visualization engines using React and WebGL."
+      company: "SDAC",
+      role: "Java Software Developer Intern",
+      period: "Jul 2024 – Feb 2025",
+      desc: "Developed backend services in Java with MySQL and REST APIs. Utilized Apache Tomcat and JSP for server-side programming and supported front-end development."
     },
     {
-      company: "Stellar Labs",
-      role: "Full Stack Engineer",
-      period: "2021 - 2023",
-      desc: "Developed distributed systems handling millions of daily requests."
+      company: "Redynox, VaultOfCodes & TechnoHacks",
+      role: "Cybersecurity & Ethical Hacking Intern",
+      period: "Sep 2024 – July 2025",
+      desc: "Performed penetration testing and vulnerability assessments using Nmap, Burp Suite, and SQLMap. Secured web applications and cloud infrastructure against potential exploits."
+    },
+    {
+      company: "INeuBytes & Edunet Foundation",
+      role: "Artificial Intelligence Intern",
+      period: "Mar 2025 – Apr 2025",
+      desc: "Built AI-powered solutions using LLMs, RAG pipelines, and NLP techniques. Utilized Torch and TensorFlow for AI model development and data analysis."
+    },
+    {
+      company: "Codotech & VaultOfCodes",
+      role: "Python Developer Intern",
+      period: "Mar 2025 – Jun 2025",
+      desc: "Developed full-stack web applications using Flask and Django. Implemented Machine Learning models and AI Agents using Pandas, NumPy, and NLTK integrated with responsive front-ends."
+    },
+    {
+      company: "Freelancer",
+      role: "Web Developer",
+      period: "July 2025 – Present",
+      desc: "Engineered end-to-end, high-availability full-stack applications and AI automation agents. Deployed cloud-native solutions across AWS, Azure, and GCP using Docker, Kubernetes, and CI/CD pipelines."
     }
   ];
+
+  const [revealedCount, setRevealedCount] = useState(-1);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const pathPoints = useMemo(() => [
+    { x: 0, y: 125 },
+    { x: 100, y: 175 },
+    { x: 300, y: 75 },
+    { x: 500, y: 175 },
+    { x: 700, y: 75 },
+    { x: 900, y: 175 },
+    { x: 1000, y: 125 }
+  ], []);
+
+  const currentPoint = pathPoints[revealedCount + 1] || pathPoints[0];
+  const nextPoint = pathPoints[revealedCount + 2] || currentPoint;
+
+  const shipRotation = useMemo(() => {
+    const angle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x) * (180 / Math.PI);
+    return angle + 45; // adjustment for Rocket icon pointing top-right-ish
+  }, [currentPoint, nextPoint]);
+
+  useEffect(() => {
+    if (isAnimating && revealedCount < experiences.length) {
+      const timer = setTimeout(() => {
+        setRevealedCount(prev => prev + 1);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [revealedCount, isAnimating, experiences.length]);
 
   return (
     <section id="experience" className="experience">
       <div className="section-header">
         <h2 className="section-title">Professional <span className="gradient-text">Journey</span></h2>
       </div>
+
+      {/* Desktop Staircase Layout */}
+      <motion.div
+        className="staircase-wrapper"
+        onViewportEnter={() => setIsAnimating(true)}
+      >
+        <div className="staircase-svg-container">
+          <svg width="100%" height="100%" viewBox="0 0 1000 250" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+            <motion.path
+              d="M 0 125 L 100 175 L 300 75 L 500 175 L 700 75 L 900 175 L 1000 125"
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ opacity: 0.4 }}
+              animate={{
+                pathLength: Math.min(1, (revealedCount + 1) / experiences.length)
+              }}
+              transition={{ duration: 1, ease: "linear" }}
+            />
+            <motion.path
+              d="M 0 125 L 100 175 L 300 75 L 500 175 L 700 75 L 900 175 L 1000 125"
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="0.5"
+              strokeLinecap="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{
+                pathLength: Math.min(1, (revealedCount + 1) / experiences.length),
+                opacity: [0.2, 1, 0.2]
+              }}
+              transition={{
+                pathLength: { duration: 1, ease: "linear" },
+                opacity: { repeat: Infinity, duration: 2 }
+              }}
+              style={{ filter: 'drop-shadow(0 0 10px var(--primary))' }}
+            />
+            {/* Spaceship */}
+            <motion.g
+              animate={{
+                x: currentPoint.x,
+                y: currentPoint.y,
+                rotate: shipRotation
+              }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+            >
+              <foreignObject x="-20" y="-20" width="40" height="40">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isAnimating ? 1 : 0 }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--primary)'
+                  }}
+                >
+                  <Rocket size={24} style={{ filter: 'drop-shadow(0 0 10px var(--primary))' }} />
+                </motion.div>
+              </foreignObject>
+
+              {/* Ship Engine Core */}
+              <motion.circle
+                r="3"
+                cx="-12"
+                cy="0"
+                fill="var(--primary)"
+                animate={{
+                  scale: [1, 2, 1],
+                  opacity: [0.5, 1, 0.5]
+                }}
+                transition={{ repeat: Infinity, duration: 0.4 }}
+                style={{ filter: 'blur(3px)' }}
+              />
+            </motion.g>
+          </svg>
+        </div>
+
+        <div className="staircase-nodes">
+          {experiences.map((exp, i) => {
+            const isRevealed = i <= revealedCount;
+            const isCurrent = i === revealedCount;
+            const position = i % 2 === 0 ? 'below' : 'above';
+
+            return (
+              <div key={i} className={`stair-node ${position} ${isRevealed ? 'is-revealed' : ''}`}>
+                <div className="stair-connector" />
+                <AnimatePresence>
+                  {isRevealed && (
+                    <motion.div
+                      className="stair-card-wrap"
+                      initial={{ opacity: 0, y: position === 'above' ? -30 : 30, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                    >
+                      <div className={`stair-card glass-card ${isCurrent ? 'full' : 'mini'}`}>
+                        <h3>{exp.role}</h3>
+                        <h4>{exp.company}</h4>
+                        <p className="stair-desc">{exp.desc}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Mobile Timeline Layout */}
       <div className="timeline">
         {experiences.map((exp, i) => (
           <motion.div
@@ -1049,156 +1285,754 @@ const ExperienceSection = () => {
   );
 };
 
-const EducationSection = () => (
-  <section id="education" className="education">
-    <div className="section-header">
-      <h2 className="section-title">Academic <span className="gradient-text">Roots</span></h2>
-    </div>
-    <div className="edu-grid">
-      <div className="edu-card glass-card">
-        <h3>B.S. Computer Science</h3>
-        <p className="edu-inst">Imperial Tech University</p>
-        <p className="edu-grade">GPA 3.9/4.0</p>
+const EducationSection = () => {
+  const [isLinked, setIsLinked] = useState(false);
+
+  return (
+    <section id="education" className="education">
+      <div className="section-header">
+        <h2 className="section-title">Academic <span className="gradient-text">Roots</span></h2>
       </div>
-      <div className="edu-card glass-card">
-        <h3>Adv. Software Engineering</h3>
-        <p className="edu-inst">Digital Polytech Institute</p>
-        <p className="edu-grade">Honors Certificate</p>
-      </div>
-    </div>
-  </section>
-);
+
+      <motion.div
+        className="edu-uplink-container"
+        onViewportEnter={() => setIsLinked(true)}
+      >
+        {/* Education Card reveal */}
+        <div className="edu-content-wrap">
+          <motion.div
+            className="edu-card glass-card holographic"
+            initial={{ opacity: 0, y: 50, scale: 0.9, filter: 'brightness(0) blur(10px)' }}
+            animate={isLinked ? { opacity: 1, y: 0, scale: 1, filter: 'brightness(1) blur(0px)' } : {}}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+          >
+            <div className="hologram-overlay" />
+
+            <motion.h3
+              initial={{ opacity: 0, x: -20 }}
+              animate={isLinked ? { opacity: 1, x: 0 } : {}}
+              transition={{ delay: 0.5 }}
+            >
+              Bachelor of Science in Information Technology (B.Sc IT)
+            </motion.h3>
+
+            <motion.p
+              className="edu-inst"
+              initial={{ opacity: 0 }}
+              animate={isLinked ? { opacity: 1 } : {}}
+              transition={{ delay: 0.7 }}
+            >
+              University of Mumbai
+            </motion.p>
+
+            <motion.div
+              className="edu-meta-grid"
+              initial={{ opacity: 0, y: 10 }}
+              animate={isLinked ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.9 }}
+            >
+              <div className="meta-item">
+                <span className="label">Grade</span>
+                <span className="value">8.7/10 CGPA</span>
+              </div>
+              <div className="meta-item">
+                <span className="label">Period</span>
+                <span className="value">2022 – 2025</span>
+              </div>
+              <div className="meta-item">
+                <span className="label">Location</span>
+                <span className="value">Mumbai, MH</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </section>
+  );
+};
 
 const CertsSection = () => {
-  const certs = ["AWS Solutions Architect", "TensorFlow Developer", "Google Cloud Lead Engineer"];
+  const [isScanning, setIsScanning] = useState(false);
+  const certs = [
+    { name: "ISO/IEC 20000 IT Service Management Associate", issuer: "Skillfront", type: "Security" },
+    { name: "ISO/IEC 27001 Information Security Associate", issuer: "Skillfront", type: "Security" },
+    { name: "Gemini Certified University Student", issuer: "Google", type: "AI" },
+    { name: "Neo4j Certified Professional", issuer: "Neo4j GraphAcademy", type: "Database" },
+    { name: "ACCELQ Automation Engineer", issuer: "ACCELQ", type: "Automation" },
+    { name: "Postman API Fundamentals", issuer: "Postman", type: "API" },
+    { name: "AWS Databricks Platform Architect", issuer: "Databricks", type: "Cloud" },
+    { name: "Google Cloud Technical Series", issuer: "Google Cloud", type: "Cloud" },
+    { name: "Vaadin 24 Certified Developer", issuer: "Vaadin", type: "Dev" }
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 12
+      }
+    }
+  };
+
   return (
     <section id="certs" className="certs">
       <div className="section-header">
         <h2 className="section-title">Expert <span className="gradient-text">Validations</span></h2>
       </div>
-      <div className="certs-grid">
-        {certs.map((cert, i) => (
-          <motion.div key={i} whileHover={{ scale: 1.05 }} className="cert-tag glass-card">
-            <Globe className="cert-icon" size={16} />
-            <span>{cert}</span>
-          </motion.div>
-        ))}
+
+      <motion.div
+        className="certs-scanner-container"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: false, amount: 0.1 }}
+        onViewportEnter={() => setIsScanning(true)}
+        onViewportLeave={() => setIsScanning(false)}
+        variants={containerVariants}
+      >
+        {/* Virtual Scanner Line - Uses hardware-accelerated 'y' */}
+        <motion.div
+          className="scanner-line"
+          initial={{ y: 0 }}
+          animate={isScanning ? { y: [0, 600, 0] } : {}}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          style={{ top: 0 }}
+        />
+        <div className="certs-grid">
+          {certs.map((cert, i) => {
+            const Icon = cert.type === 'Security' ? Shield :
+              cert.type === 'AI' ? Brain :
+                cert.type === 'Database' ? Database :
+                  cert.type === 'Automation' ? Zap :
+                    cert.type === 'API' ? Code2 :
+                      cert.type === 'Cloud' ? Cloud : Palette;
+
+            return (
+              <motion.div
+                key={i}
+                variants={cardVariants}
+                className="cert-tag glass-card holographic-tag fancy-card"
+                style={{ perspective: '1200px' }}
+              >
+                <motion.div
+                  className="card-inner"
+                  whileHover={{ rotateY: 12, rotateX: -8, translateZ: 20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <div className="cert-header">
+                    <div className="cert-category">
+                      <span className="cert-type">{cert.type}</span>
+                    </div>
+                    <Icon className="cert-card-icon" size={20} />
+                  </div>
+
+                  <div className="cert-body">
+                    <h3 className="cert-name">{cert.name}</h3>
+                    <div className="cert-footer">
+                      <span className="cert-issuer-label">Issued by</span>
+                      <span className="cert-issuer">{cert.issuer}</span>
+                    </div>
+                  </div>
+                  <div className="card-shine" />
+                </motion.div>
+                <div className="cert-glitch-layer" />
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+    </section>
+  );
+};
+
+const VolunteerSection = () => {
+  const [phase, setPhase] = useState<'idle' | 'approaching' | 'tearing' | 'revealed'>('idle');
+
+  const volunteerXP = [
+    {
+      id: "LOG-AWS-01",
+      org: "AWS Community",
+      role: "Community Builder",
+      period: "2025 – Present",
+      priority: "MEDIUM",
+      status: "ACTIVE",
+      desc: "Drive community engagement by creating in-depth technical content (blog posts, videos, and tutorials) focused on AWS cloud technologies."
+    },
+    {
+      id: "LOG-GCP-02",
+      org: "Google Cloud Skills Boost",
+      role: "Innovator",
+      period: "2025 – Present",
+      priority: "CRITICAL",
+      status: "ACTIVE",
+      desc: "Focusing on personal growth through innovative problem-solving, learning cutting-edge cloud technologies, and fostering tech community engagement."
+    },
+    {
+      id: "LOG-MU-03",
+      org: "DLLE, Mumbai University",
+      role: "Member – Dept. of Lifelong Learning",
+      period: "2024 – 2025",
+      priority: "MEDIUM",
+      status: "COMPLETED",
+      desc: "Supporting lifelong learning programs by mentoring others and advancing educational accessibility and community development."
+    }
+  ];
+
+  useEffect(() => {
+    if (phase === 'approaching') {
+      const timer = setTimeout(() => setPhase('tearing'), 1800);
+      return () => clearTimeout(timer);
+    }
+    if (phase === 'tearing') {
+      const timer = setTimeout(() => setPhase('revealed'), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
+
+  return (
+    <section id="volunteer" className="volunteer">
+      <div className="section-header">
+        <h2 className="section-title">Community <span className="gradient-text">Logs</span></h2>
+      </div>
+
+      <div className="vol-container">
+        <AnimatePresence mode="wait">
+          {phase !== 'revealed' ? (
+            <motion.div
+              key="sequence"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="archive-sequence"
+              onViewportEnter={() => phase === 'idle' && setPhase('approaching')}
+            >
+              <div className="sequence-track centered">
+                {phase !== 'tearing' ? (
+                  <motion.div
+                    className={`zip-folder-wrap ${phase === 'approaching' ? 'glitch-shake' : ''}`}
+                    animate={phase === 'approaching' ? {
+                      scale: [1, 1.3, 1.3, 2],
+                      filter: ["blur(0px)", "blur(0px)", "blur(5px)", "blur(10px)"]
+                    } : {}}
+                    transition={{ duration: 1.8, times: [0, 0.4, 0.6, 1], ease: "easeInOut" }}
+                  >
+                    <FolderArchive size={100} className="zip-icon" />
+                    <span className="zip-label">DECRYPTING_LOGS.EXE</span>
+                  </motion.div>
+                ) : (
+                  <div className="folder-shards">
+                    {[
+                      { id: 'tl', x: -300, y: -300, r: -45, clip: 'polygon(0 0, 50% 0, 50% 50%, 0 50%)' },
+                      { id: 'tr', x: 300, y: -300, r: 45, clip: 'polygon(50% 0, 100% 0, 100% 50%, 50% 50%)' },
+                      { id: 'bl', x: -300, y: 300, r: -90, clip: 'polygon(0 50%, 50% 50%, 50% 100%, 0 100%)' },
+                      { id: 'br', x: 300, y: 300, r: 90, clip: 'polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)' }
+                    ].map(shard => (
+                      <motion.div
+                        key={shard.id}
+                        className="shard"
+                        initial={{ x: 0, y: 0, opacity: 1, scale: 2 }}
+                        animate={{
+                          x: shard.x,
+                          y: shard.y,
+                          rotate: shard.r,
+                          opacity: 0,
+                          scale: 0.5
+                        }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{ clipPath: shard.clip }}
+                      >
+                        <FolderArchive size={100} className="zip-icon" />
+                      </motion.div>
+                    ))}
+                    <motion.div
+                      className="tear-flash"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: [0, 1, 0], scale: [1, 2] }}
+                      transition={{ duration: 0.4 }}
+                    />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="vol-grid"
+            >
+              {volunteerXP.map((xp, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.15 }}
+                  className="vol-dossier"
+                >
+                  <div className="dossier-tab">
+                    <span className="file-id">{xp.id}</span>
+                    <div className="priority-badge" data-priority={xp.priority}>
+                      {xp.priority}
+                    </div>
+                  </div>
+                  <div className="dossier-content glass-card">
+                    <div className="dossier-header">
+                      <h3>{xp.org}</h3>
+                      <span className="dossier-role">{xp.role}</span>
+                    </div>
+                    <div className="dossier-body">
+                      <p className="dossier-desc">{xp.desc}</p>
+                    </div>
+                    <div className="dossier-footer">
+                      <span className="dossier-period">{xp.period}</span>
+                      <span className="status-label">FILE: {xp.status}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
 };
 
-const VolunteerSection = () => (
-  <section id="volunteer" className="volunteer">
-    <div className="section-header">
-      <h2 className="section-title">Community <span className="gradient-text">Impact</span></h2>
-    </div>
-    <div className="vol-card glass-card">
-      <h3>Tech for Humanity</h3>
-      <p>Mentored 20+ aspiring developers from underrepresented communities in building their first applications.</p>
-    </div>
-  </section>
-);
+const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (val: boolean) => void }) => {
+  const [messages, setMessages] = useState<{ type: 'user' | 'ai', content: string | React.ReactNode }[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isAITyping, setIsAITyping] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
+  const terminalEndRef = useRef<HTMLDivElement>(null);
 
-const ContactSection = () => {
+  const contactOptions = [
+    { label: "GMAIL (Official)", url: "mailto:mehtahrishi45@gmail.com?subject=Mission%20Inquiry&body=Greetings%20Rishi,%0D%0AI%20am%20reaching%20out%20to%20discuss..." },
+    { label: "LINKEDIN (Professional)", url: "https://www.linkedin.com/in/hrishi-mehta-889732256/" },
+    { label: "GITHUB (Engine)", url: "https://github.com/mehtahrishi" }
+  ];
+
+  const geminiAscii = `
+       ░░░      ░░░          ░░░        ░░░ ░░░ ░░░ ░░░  ░░░  ░░░ ░░░  ░░░    ░░░
+ ███     ░░░    █████████░░██████████ ██████ ░░██████░█████░██████ ░░█████ █████░
+   ███ ░░░     ███░    ███░███░░      ██████  ░██████░░███░░██████  ░█████  ███░░
+     ███      ███░░░     ░░███░░      ███░███ ███ ███░░███░░███░███  ███░░  ███░░
+   ░░░ ███    ███ ░░░█████░██████░░░░░███░░█████  ███░░███░░███░░███ ███░░░ ███░░░
+     ███      ███      ███ ███        ███   ███   ███  ███  ███   ██████    ███
+   ███         ███     ███ ███        ███         ███  ███  ███    █████    ███
+ ███            █████████  ██████████ ███         ███ █████ ███     █████  █████
+  `;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (messages.length === 0) {
+      const timer = setTimeout(() => {
+        setMessages([
+          { type: 'ai', content: <pre className="terminal-ascii">{geminiAscii}</pre> },
+          {
+            type: 'ai',
+            content: (
+              <div className="terminal-welcome">
+                <div className="welcome-header">Mission Briefing for Lead Engineer:</div>
+                <div className="welcome-list">
+                  1. Architect of <span className="highlight">KnowMe CLI</span> - A Bash-native tool for hardware intelligence.
+                  <br />2. Recognized <span className="highlight">Google Gen AI Top Performer</span>.
+                  <br />3. Winner of the <span className="highlight">AWS Amazon Q CLI Challenge</span>.
+                  <br />4. Certified Professional: <span className="highlight">ISO / AI / Neo4j Graph DB</span>.
+                  <br />5. Expert in Large Language Models, Full Stack, and Multi-Modal SDKs (Gemini, Claude).
+                </div>
+                <div className="welcome-footer">I've decoded 3 secure transmission channels. Select your uplink.</div>
+                <pre className="terminal-warning">
+                  <div className="terminal-warning-header">WARNING</div>
+                  <div className="terminal-warning-content">
+                    [!] Warning: Running in high-privilege.  │
+                    Cannot be disabled in /settings. Hehe :)
+                  </div>
+                </pre>
+              </div>
+            )
+          }
+        ]);
+        setShowMenu(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, messages.length]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        setMessages(prev => [...prev, { type: 'user', content: '^C' }]);
+        setInputValue("");
+        setShowMenu(false);
+        return;
+      }
+      if (!showMenu) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev + 1) % contactOptions.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev - 1 + contactOptions.length) % contactOptions.length);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const selected = contactOptions[selectedIndex];
+        setMessages(prev => [
+          ...prev,
+          { type: 'user', content: `select ${selected.label}` },
+          { type: 'ai', content: `Redirecting to ${selected.label}... Sub-space link established.` }
+        ]);
+        window.open(selected.url, '_blank');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, showMenu, selectedIndex]);
+
+  useEffect(() => {
+    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isAITyping]);
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    const userMessage = inputValue.trim().toLowerCase();
+    setMessages(prev => [...prev, { type: 'user', content: inputValue }]);
+    setInputValue("");
+    if (userMessage === 'clear') {
+      setMessages([]);
+      return;
+    }
+    if (userMessage === 'menu' || userMessage === 'contact') {
+      setShowMenu(true);
+      setMessages(prev => [...prev, { type: 'ai', content: "Re-initializing interactive menu..." }]);
+      return;
+    }
+    if (userMessage === 'exit' || userMessage === 'quit') {
+      setIsOpen(false);
+      return;
+    }
+    setIsAITyping(true);
+    setTimeout(() => {
+      let response = "Manual transmission logged. I have relayed your coordinates to Rishi. Type 'menu' to see direct uplinks.";
+      if (userMessage.includes('hello') || userMessage.includes('hi')) {
+        response = "Hello! I am ready for your instructions. Type 'menu' to see contact options or 'clear' to reset terminal.";
+      }
+      setMessages(prev => [...prev, { type: 'ai', content: response }]);
+      setIsAITyping(false);
+    }, 1500);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="global-terminal-overlay"
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        >
+          <div className="terminal-container global-variant">
+            <div className="terminal-header">
+              <div className="terminal-title">guest@portfolio:~/bash</div>
+              <div className="terminal-controls">
+                <button onClick={() => setIsOpen(false)} className="terminal-close-btn">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div
+              className="terminal-body"
+              tabIndex={0}
+              onClick={() => document.getElementById('global-terminal-input')?.focus()}
+            >
+              {messages.map((msg, i) => {
+                const isSpecial = isValidElement(msg.content) &&
+                  ["terminal-ascii", "terminal-welcome", "terminal-warning"].includes((msg.content as React.ReactElement<any>).props.className);
+
+                return (
+                  <div key={i} className={`terminal-line ${msg.type}`}>
+                    {!isSpecial && <span className="prompt gemini-prompt">&gt;</span>}
+                    <span className="command">{msg.content}</span>
+                  </div>
+                );
+              })}
+
+              {showMenu && (
+                <div className="terminal-menu fzf-style">
+                  <div className="menu-header">Transmission channels:</div>
+                  {contactOptions.map((opt, i) => (
+                    <div
+                      key={opt.label}
+                      className={`menu-item ${selectedIndex === i ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedIndex(i);
+                        setMessages(prev => [
+                          ...prev,
+                          { type: 'user', content: `select ${opt.label}` },
+                          { type: 'ai', content: `Redirecting to ${opt.label}... Sub-space link established.` }
+                        ]);
+                        window.open(opt.url, '_blank');
+                      }}
+                    >
+                      <span className="menu-cursor">{selectedIndex === i ? '>' : ' '}</span>
+                      <span className="menu-label">{opt.label}</span>
+                    </div>
+                  ))}
+                  <div className="menu-footer">
+                    [Total: {contactOptions.length}]
+                    <span className="menu-keys"> (Use arrows, enter to select)</span>
+                  </div>
+                </div>
+              )}
+
+              {isAITyping && (
+                <div className="terminal-line ai">
+                  <span className="prompt gemini-prompt">&gt;</span>
+                  <span className="command typing-dots">Typing<span>.</span><span>.</span><span>.</span></span>
+                </div>
+              )}
+              <div ref={terminalEndRef} />
+
+              <form onSubmit={handleSend} className="terminal-input-wrap">
+                <span className="prompt gemini-prompt">&gt;</span>
+                <input
+                  id="global-terminal-input"
+                  type="text"
+                  className="terminal-input"
+                  placeholder="Type command..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  autoFocus
+                />
+                <div className="terminal-cursor"></div>
+              </form>
+            </div>
+            <div className="terminal-glow"></div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+
+const GlitchText = ({ text }: { text: string }) => {
+  const [displayText, setDisplayText] = useState(text);
+  const [isGlitching, setIsGlitching] = useState(false);
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+';
+
+  const scramble = useCallback(() => {
+    let iterations = 0;
+    setIsGlitching(true);
+
+    const interval = setInterval(() => {
+      setDisplayText(prev =>
+        prev.split('').map((_, index) => {
+          if (index < iterations) return text[index];
+          return characters[Math.floor(Math.random() * characters.length)];
+        }).join('')
+      );
+
+      if (iterations >= text.length) {
+        clearInterval(interval);
+        setIsGlitching(false);
+      }
+      iterations += 1 / 3;
+    }, 30);
+  }, [text]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isGlitching) scramble();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [scramble, isGlitching]);
+
+  return (
+    <h2
+      className={`glitch-text ${isGlitching ? 'active' : ''}`}
+      data-text={text}
+      onMouseEnter={scramble}
+    >
+      {displayText}
+    </h2>
+  );
+};
+
+const ContactSection = ({ onOpenTerminal }: { onOpenTerminal: () => void }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <section id="contact" className="contact">
-      <div className="contact-card glass-card">
+      <div className="contact-card luxury-contact">
         <div className="contact-info">
-          <h2>Ready to <span className="gradient-text">Illuminate</span> your next project?</h2>
-          <p>I'm always open to discussing innovative ideas, partnership opportunities, or mentorship.</p>
-          <div className="social-links">
-            <a href="#"><Github /></a>
-            <a href="#"><Linkedin /></a>
-            <a href="#"><Twitter /></a>
-            <a href="#"><Mail /></a>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="illuminate-header"
+          >
+            <GlitchText text="READY TO ILLUMINATE?" />
+            <div className="illuminate-bar"></div>
+          </motion.div>
+
+          <p className="contact-desc">
+            Bridge the gap between vision and reality. Initialize a secure shell
+            to established high-bandwidth transmission directly to my lead engineer.
+          </p>
+
+        </div>
+
+        <div
+          className={`terminal-activation-zone ${!isMobile ? 'desktop-only' : ''}`}
+          onClick={onOpenTerminal}
+        >
+          <div className="activation-glow"></div>
+          <div className="activation-content">
+            <div className="activation-icon-wrap">
+              <div className="radar-ping"></div>
+              <Rocket className="activation-icon" />
+            </div>
+
+            <div className="activation-tags">
+              <span className="tag">SECURE_ID: GEMINI_SHELL</span>
+              <span className="tag status">STATUS: IDLE</span>
+            </div>
+
+            <div className="shortcut-display">
+              <div className="step">
+                <span className="step-num">01</span>
+                <span className="step-text">PRESS</span>
+                <div className="shortcut-keys">
+                  <span className="key-cap">CTRL</span>
+                  <span className="key-plus">+</span>
+                  <span className="key-cap highlight-key">G</span>
+                </div>
+              </div>
+              <div className="step-divider"></div>
+              <div className="step">
+                <span className="step-num">02</span>
+                <span className="step-text">EXECUTE</span>
+                <span className="action-label">COMMANDS</span>
+              </div>
+            </div>
+
+            {isMobile && (
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="mobile-tap-prompt"
+              >
+                INITIALIZE UPLINK [TAP]
+              </motion.div>
+            )}
           </div>
         </div>
-        <form className="contact-form">
-          <div className="form-group">
-            <input type="text" placeholder="Full Name" />
-          </div>
-          <div className="form-group">
-            <input type="email" placeholder="Email Address" />
-          </div>
-          <div className="form-group">
-            <textarea placeholder="Your Message" rows={4}></textarea>
-          </div>
-          <button type="submit" className="btn-primary w-full">Send Transmission</button>
-        </form>
       </div>
     </section>
   );
 };
 
-const AboutSection = () => (
-  <section id="about" className="about">
-    <div className="about-grid">
-      <div className="about-text">
-        <h2 className="section-title">Behind the <span className="gradient-text">Screen</span></h2>
-        <p>
-          I'm a Versatile DevSecOps Engineer with hands-on experience in secure full-stack development,
-          cloud infrastructure (AWS, GCP), and CI/CD automation using Docker, Nginx, Cloudflare and Kubernetes.
-          Proficient in Python, Node.js, and Next.js with strengths in automation testing (Selenium, Postman)
-          and AI/ML workflows using PyTorch and TensorFlow. Seeking impactful roles in software development,
-          cloud devops or aiml engineer.
-        </p>
-        <div className="about-stats">
-          <div className="stat">
-            <motion.span
-              className="stat-num"
-              initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              viewport={{ once: false }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            >
-              1+
-            </motion.span>
-            <span className="stat-label">Year XP</span>
-          </div>
-          <div className="stat">
-            <motion.span
-              className="stat-num"
-              initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              viewport={{ once: false }}
-              transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            >
-              10+
-            </motion.span>
-            <span className="stat-label">Projects</span>
-          </div>
-          <div className="stat">
-            <div className="stat-num curiosity-stat">
-              <svg width="40" height="24" viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <motion.path
-                  d="M7.5 3C10.5 3 13.5 9 16.5 9C19.5 9 21 7.5 21 6C21 4.5 19.5 3 16.5 3C13.5 3 10.5 9 7.5 9C4.5 9 3 7.5 3 6C3 4.5 4.5 3 7.5 3Z"
-                  stroke="var(--primary)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: false }}
-                  transition={{ duration: 1.5, ease: "easeInOut" }}
-                />
-              </svg>
+const AboutSection = () => {
+  const [startTyping, setStartTyping] = useState(false);
+
+  return (
+    <section id="about" className="about">
+      <div className="about-grid">
+        <motion.div
+          className="about-text"
+          onViewportEnter={() => setStartTyping(true)}
+        >
+          <h2 className="section-title">Behind the <span className="gradient-text">Screen</span></h2>
+          <p style={{ minHeight: '100px' }}>
+            {startTyping && (
+              <Typewriter
+                text="I'm a Versatile DevSecOps Engineer with hands-on experience in secure full-stack development, cloud infrastructure (AWS, GCP), and CI/CD automation using Docker, Nginx, Cloudflare and Kubernetes. Proficient in Python, Node.js, and Next.js with strengths in automation testing (Selenium, Postman) and AI/ML workflows using PyTorch and TensorFlow. Seeking impactful roles in software development, cloud devops or aiml engineer."
+                delay={20}
+              />
+            )}
+          </p>
+          <div className="about-stats">
+            <div className="stat">
+              <motion.span
+                className="stat-num"
+                initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
+                whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                viewport={{ once: false }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              >
+                1+
+              </motion.span>
+              <span className="stat-label">Year XP</span>
             </div>
-            <span className="stat-label">Curiosity</span>
+            <div className="stat">
+              <motion.span
+                className="stat-num"
+                initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
+                whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                viewport={{ once: false }}
+                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+              >
+                10+
+              </motion.span>
+              <span className="stat-label">Projects</span>
+            </div>
+            <div className="stat">
+              <div className="stat-num curiosity-stat">
+                <svg width="40" height="24" viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <motion.path
+                    d="M7.5 3C10.5 3 13.5 9 16.5 9C19.5 9 21 7.5 21 6C21 4.5 19.5 3 16.5 3C13.5 3 10.5 9 7.5 9C4.5 9 3 7.5 3 6C3 4.5 4.5 3 7.5 3Z"
+                    stroke="var(--primary)"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                  />
+                </svg>
+              </div>
+              <span className="stat-label">Curiosity</span>
+            </div>
           </div>
+        </motion.div>
+        <div className="about-visual glass-card">
+          <SpaceGame />
         </div>
       </div>
-      <div className="about-visual glass-card">
-        <SpaceGame />
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const Footer = () => (
   <footer className="footer">
     <div className="footer-content">
       <div className="footer-logo">
-        <Orbit className="logo-icon" size={24} />
+        <Zap className="logo-icon" size={24} />
         <span>HRISHI'S SPACE</span>
       </div>
       <p>&copy; 2026 Crafted with precision by <span className="text-white">Hrishi</span>.</p>
@@ -1209,12 +2043,25 @@ const Footer = () => (
 const App = () => {
   const [theme, setTheme] = useState('obsidian');
   const [loading, setLoading] = useState(true);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
   }, [theme]);
+
+  // Global Ctrl+G handler
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'g') {
+        e.preventDefault();
+        setIsTerminalOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   return (
     <div className="app">
@@ -1257,9 +2104,10 @@ const App = () => {
             <EducationSection />
             <CertsSection />
             <VolunteerSection />
-            <ContactSection />
+            <ContactSection onOpenTerminal={() => setIsTerminalOpen(true)} />
           </div>
           <Footer />
+          <GlobalTerminal isOpen={isTerminalOpen} setIsOpen={setIsTerminalOpen} />
         </>
       )}
     </div>
