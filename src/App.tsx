@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback, isValidElement } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Zap, ArrowRight, ChevronDown, Rocket, Database, Brain, Server, Palette, Shield, Cloud, X, FolderArchive } from 'lucide-react';
+import { Code2, Zap, ArrowRight, Rocket, Database, Brain, Server, Shield, Cloud, X, FolderArchive } from 'lucide-react';
 import { GoCopilot } from "react-icons/go";
 import { FaCss3Alt, FaAws } from "react-icons/fa";
 import { IoLogoJavascript, IoFlash } from "react-icons/io5";
@@ -8,24 +8,48 @@ import { RiGeminiFill } from "react-icons/ri";
 import { SiFirebase, SiGnubash, SiGithubactions, SiDrizzle, SiClaude, SiPostgresql, SiPostman, SiPuppeteer } from "react-icons/si";
 import { TbBrandMysql } from "react-icons/tb";
 import { AiOutlineOpenAI } from "react-icons/ai";
-import confetti from 'canvas-confetti';
 import './App.css';
 
 // Components
 const CosmicBackground = () => {
   const stars = useMemo(() => {
-    return [...Array(100)].map((_, i) => ({
+    return [...Array(200)].map((_, i) => ({
       id: i,
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
-      size: `${1 + Math.random() * 3}px`,
-      opacity: 0.3 + Math.random() * 0.7,
-      duration: `${2 + Math.random() * 4}s`
+      size: `${1 + Math.random() * 2.5}px`,
+      opacity: 0.2 + Math.random() * 0.8,
+      duration: `${3 + Math.random() * 5}s`
     }));
+  }, []);
+
+  const nebulae = useMemo(() => {
+    return [
+      { id: 1, top: '10%', left: '15%', size: '60vw', color: 'radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%)', duration: '50s' },
+      { id: 2, top: '60%', left: '50%', size: '70vw', color: 'radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 70%)', duration: '60s' },
+      { id: 3, top: '30%', left: '70%', size: '50vw', color: 'radial-gradient(circle, rgba(34, 211, 238, 0.3), transparent 70%)', duration: '45s' },
+      { id: 4, top: '-10%', left: '60%', size: '40vw', color: 'radial-gradient(circle, rgba(244, 114, 182, 0.2), transparent 70%)', duration: '55s' },
+    ];
   }, []);
 
   return (
     <div className="cosmic-bg">
+      {/* Nebulae (Background Layer) */}
+      {nebulae.map(neb => (
+        <div
+          key={neb.id}
+          className="nebula"
+          style={{
+            top: neb.top,
+            left: neb.left,
+            width: neb.size,
+            height: neb.size,
+            background: neb.color,
+            '--duration': neb.duration
+          } as any}
+        />
+      ))}
+
       {/* Stars */}
       {
         stars.map((star) => (
@@ -232,7 +256,7 @@ const CosmicBackground = () => {
       >
         <div className="asteroid-trail" />
       </div>
-    </div >
+    </div>
   );
 };
 
@@ -556,10 +580,16 @@ const SpaceGame = () => {
             <h2 className="result-title">
               <Typewriter text="Mission Results" delay={70} />
             </h2>
-            <div className="result-stats" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>SURVIVED: <span style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(missionProgress / 100 * 90)}</span></div>
-              <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>TIME LEFT: <span style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(Math.max(0, 90 - (missionProgress / 100 * 90)))}</span></div>
-            </div>
+            {(() => {
+              const survivedSecs = Math.floor((missionProgress / 100) * 90);
+              const timeLeftSecs = Math.max(0, 90 - survivedSecs);
+              return (
+                <div className="result-stats" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>SURVIVED: <span style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(survivedSecs)}</span></div>
+                  <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>TIME LEFT: <span style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(timeLeftSecs)}</span></div>
+                </div>
+              );
+            })()}
             <div className="result-secret">
               "<Typewriter text={finalSecret} delay={30} />"
             </div>
@@ -629,7 +659,7 @@ const CustomCursor = () => {
 
     const handleHover = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      setIsHovering(!!target.closest('button, a, .stack-card, .timeline-item, .edu-card, .cert-tag'));
+      setIsHovering(!!target.closest('button, a, .stack-card, .timeline-item, .edu-card, .cert-tag, .skill-icon-wrap'));
       setIsInGame(!!target.closest('.game-wrapper'));
       setIsTerminal(!!target.closest('.terminal-container'));
     };
@@ -677,52 +707,7 @@ const CustomCursor = () => {
   );
 };
 
-const ThemeSwitcher = ({ currentTheme, setTheme }: { currentTheme: string, setTheme: (t: string) => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const themes = ['obsidian', 'nebula', 'blueprint'];
 
-  return (
-    <div className="theme-switcher">
-      <motion.button
-        whileHover={{ rotate: 180 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className="theme-btn glass-card"
-      >
-        <Palette size={20} />
-      </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="theme-options glass-card"
-          >
-            {themes.map(t => (
-              <button
-                key={t}
-                className={`theme-option ${currentTheme === t ? 'active' : ''}`}
-                onClick={() => {
-                  setTheme(t);
-                  setIsOpen(false);
-                  confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: t === 'nebula' ? ['#a855f7', '#ec4899'] : t === 'blueprint' ? ['#22d3ee', '#3b82f6'] : ['#6366f1', '#4f46e5']
-                  });
-                }}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -793,7 +778,7 @@ const Hero = () => {
             cloud infrastructure, and AI/ML workflows.
           </p>
           <div className="hero-actions">
-            <button className="btn-primary" onClick={() => document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' })}>
+            <button className="btn-primary" onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}>
               See my work <ArrowRight size={18} />
             </button>
             <button className="btn-secondary" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
@@ -814,7 +799,13 @@ const Hero = () => {
         transition={{ repeat: Infinity, duration: 2 }}
         className="hero-scroll"
       >
-        <ChevronDown />
+        <div className="asteroid-arrow">
+          <div className="arrow-top-row">
+            <div className="asteroid-dot small" />
+            <div className="asteroid-dot small" />
+          </div>
+          <div className="asteroid-dot medium" />
+        </div>
       </motion.div>
     </section>
   );
@@ -890,10 +881,15 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { 
         }
       }}
       viewport={{ once: true }}
-      whileHover={{ scale: 1.2, transition: { delay: 0 } }}
       style={{ color } as any}
     >
-      {renderIcon()}
+      <motion.div
+        whileHover={{ scale: 1.25 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}
+      >
+        {renderIcon()}
+      </motion.div>
     </motion.div>
   );
 };
@@ -1420,7 +1416,7 @@ const CertsSection = () => {
                 cert.type === 'Database' ? Database :
                   cert.type === 'Automation' ? Zap :
                     cert.type === 'API' ? Code2 :
-                      cert.type === 'Cloud' ? Cloud : Palette;
+                      cert.type === 'Cloud' ? Cloud : Code2;
 
             return (
               <motion.div
@@ -1619,6 +1615,8 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
   const terminalEndRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'bash' | 'nav'>('bash');
+  const [navSelectedIndex, setNavSelectedIndex] = useState(0);
 
   const contactOptions = [
     { label: "GMAIL (Official)", url: "mailto:mehtahrishi45@gmail.com?subject=Mission%20Inquiry&body=Greetings%20Rishi,%0D%0AI%20am%20reaching%20out%20to%20discuss..." },
@@ -1626,47 +1624,32 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
     { label: "GITHUB (Engine)", url: "https://github.com/mehtahrishi" }
   ];
 
+  const navOptions = [
+    { label: "SUMMARY", targetId: "about" },
+    { label: "SKILLS", targetId: "skills" },
+    { label: "EXPERIENCE", targetId: "experience" },
+    { label: "EDUCATION", targetId: "education" },
+    { label: "CERTIFICATIONS", targetId: "certs" }
+  ];
+
   const geminiAscii = `
-       ░░░      ░░░          ░░░        ░░░ ░░░ ░░░ ░░░  ░░░  ░░░ ░░░  ░░░    ░░░
- ███     ░░░    █████████░░██████████ ██████ ░░██████░█████░██████ ░░█████ █████░
-   ███ ░░░     ███░    ███░███░░      ██████  ░██████░░███░░██████  ░█████  ███░░
-     ███      ███░░░     ░░███░░      ███░███ ███ ███░░███░░███░███  ███░░  ███░░
-   ░░░ ███    ███ ░░░█████░██████░░░░░███░░█████  ███░░███░░███░░███ ███░░░ ███░░░
-     ███      ███      ███ ███        ███   ███   ███  ███  ███   ██████    ███
-   ███         ███     ███ ███        ███         ███  ███  ███    █████    ███
- ███            █████████  ██████████ ███         ███ █████ ███     █████  █████
+    ███             █████████  ██████████ ██████   ██████ █████ ██████   █████ █████
+    ░░░███         ███░░░░░███░░███░░░░░█░░██████ ██████ ░░███ ░░██████ ░░███ ░░███
+      ░░░███      ███     ░░░  ░███  █ ░  ░███░█████░███  ░███  ░███░███ ░███  ░███
+        ░░░███   ░███          ░██████    ░███░░███ ░███  ░███  ░███░░███░███  ░███
+         ███░    ░███    █████ ░███░░█    ░███ ░░░  ░███  ░███  ░███ ░░██████  ░███
+       ███░      ░░███  ░░███  ░███ ░   █ ░███      ░███  ░███  ░███  ░░█████  ░███
+     ███░         ░░█████████  ██████████ █████     █████ █████ █████  ░░█████ █████
+    ░░░            ░░░░░░░░░  ░░░░░░░░░░ ░░░░░     ░░░░░ ░░░░░ ░░░░░    ░░░░░ ░░░░░
   `;
+
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [redirectInfo, setRedirectInfo] = useState<{ label: string, url: string } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
     if (messages.length === 0) {
       const timer = setTimeout(() => {
-        setMessages([
-          { type: 'ai', content: <pre className="terminal-ascii">{geminiAscii}</pre> },
-          {
-            type: 'ai',
-            content: (
-              <div className="terminal-welcome">
-                <div className="welcome-header">Mission Briefing for Lead Engineer:</div>
-                <div className="welcome-list">
-                  1. Architect of <span className="highlight">KnowMe CLI</span> - A Bash-native tool for hardware intelligence.
-                  <br />2. Recognized <span className="highlight">Google Gen AI Top Performer</span>.
-                  <br />3. Winner of the <span className="highlight">AWS Amazon Q CLI Challenge</span>.
-                  <br />4. Certified Professional: <span className="highlight">ISO / AI / Neo4j Graph DB</span>.
-                  <br />5. Expert in Large Language Models, Full Stack, and Multi-Modal SDKs (Gemini, Claude).
-                </div>
-                <div className="welcome-footer">I've decoded 3 secure transmission channels. Select your uplink.</div>
-                <pre className="terminal-warning">
-                  <div className="terminal-warning-header">WARNING</div>
-                  <div className="terminal-warning-content">
-                    [!] Warning: Running in high-privilege.  │
-                    Cannot be disabled in /settings. Hehe :)
-                  </div>
-                </pre>
-              </div>
-            )
-          }
-        ]);
         setShowMenu(true);
       }, 500);
       return () => clearTimeout(timer);
@@ -1674,15 +1657,68 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   }, [isOpen, messages.length]);
 
   useEffect(() => {
+    if (countdown === null || !redirectInfo) return;
+
+    if (countdown === 0) {
+      window.open(redirectInfo.url, '_blank');
+      setMessages(prev => [...prev, { type: 'ai', content: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>[SYSTEM] Uplink established. Redirecting now...</span> }]);
+      setCountdown(null);
+      setRedirectInfo(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setMessages(prev => [...prev, {
+        type: 'ai',
+        content: <span style={{ opacity: 0.5, fontStyle: 'italic' }}>Opening {redirectInfo.label} in {countdown}...</span>
+      }]);
+      setCountdown(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown, redirectInfo]);
+
+  useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+          return;
+        }
+      }
+
       if (e.ctrlKey && e.key === 'c') {
         e.preventDefault();
-        setMessages(prev => [...prev, { type: 'user', content: '^C' }]);
+        if (countdown !== null) {
+          setCountdown(null);
+          setRedirectInfo(null);
+          setMessages(prev => [...prev, { type: 'user', content: '^C' }, { type: 'ai', content: <span style={{ color: '#ef4444' }}>[ABORTED] Uplink sequence terminated by user.</span> }]);
+        } else {
+          setMessages(prev => [...prev, { type: 'user', content: '^C' }]);
+        }
         setInputValue("");
         setShowMenu(false);
         return;
       }
+
+      // Handle Quick Nav Tab Navigation
+      if (activeTab === 'nav') {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setNavSelectedIndex(prev => (prev + 1) % navOptions.length);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setNavSelectedIndex(prev => (prev - 1 + navOptions.length) % navOptions.length);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const target = navOptions[navSelectedIndex].targetId;
+          document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
+          setIsOpen(false);
+        }
+        return;
+      }
+
       if (!showMenu) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -1695,15 +1731,15 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
         const selected = contactOptions[selectedIndex];
         setMessages(prev => [
           ...prev,
-          { type: 'user', content: `select ${selected.label}` },
-          { type: 'ai', content: `Redirecting to ${selected.label}... Sub-space link established.` }
+          { type: 'user', content: `select ${selected.label}` }
         ]);
-        window.open(selected.url, '_blank');
+        setRedirectInfo({ label: selected.label, url: selected.url });
+        setCountdown(3);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showMenu, selectedIndex]);
+  }, [isOpen, showMenu, selectedIndex, activeTab, navSelectedIndex, navOptions, contactOptions, countdown]);
 
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1715,19 +1751,38 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
     const userMessage = inputValue.trim().toLowerCase();
     setMessages(prev => [...prev, { type: 'user', content: inputValue }]);
     setInputValue("");
+
     if (userMessage === 'clear') {
       setMessages([]);
       return;
     }
     if (userMessage === 'menu' || userMessage === 'contact') {
-      setShowMenu(true);
+      setShowMenu(false);
       setMessages(prev => [...prev, { type: 'ai', content: "Re-initializing interactive menu..." }]);
+      setTimeout(() => {
+        setMessages(prev => [...prev, { type: 'ai', content: <span style={{ color: '#22c55e' }}>[DONE] Re-initialization sequence complete.</span> }]);
+        setShowMenu(true);
+      }, 500);
       return;
     }
     if (userMessage === 'exit' || userMessage === 'quit') {
       setIsOpen(false);
       return;
     }
+
+    // Direct social commands
+    const socialCmd = contactOptions.find(opt =>
+      opt.label.toLowerCase().includes(userMessage) ||
+      (userMessage === 'mail' && opt.label.toLowerCase().includes('gmail'))
+    );
+
+    if (socialCmd) {
+      setRedirectInfo({ label: socialCmd.label, url: socialCmd.url });
+      setCountdown(3);
+      setMessages(prev => [...prev, { type: 'ai', content: `Initiating secure uplink to ${socialCmd.label.split(' ')[0]}...` }]);
+      return;
+    }
+
     setIsAITyping(true);
     setTimeout(() => {
       let response = "Manual transmission logged. I have relayed your coordinates to Rishi. Type 'menu' to see direct uplinks.";
@@ -1751,7 +1806,26 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
         >
           <div className="terminal-container global-variant">
             <div className="terminal-header">
-              <div className="terminal-title">guest@portfolio:~/bash</div>
+              <div className="terminal-tabs">
+                <div
+                  className={`terminal-tab ${activeTab === 'bash' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('bash')}
+                >
+                  <span className="tab-text">mehta@contact</span>
+                  <div className="tab-close" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
+                    <X size={12} />
+                  </div>
+                </div>
+                <div
+                  className={`terminal-tab ${activeTab === 'nav' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('nav')}
+                >
+                  <span className="tab-text">mehta@navigation</span>
+                  <div className="tab-close" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}>
+                    <X size={12} />
+                  </div>
+                </div>
+              </div>
               <div className="terminal-controls">
                 <button onClick={() => setIsOpen(false)} className="terminal-close-btn">
                   <X size={16} />
@@ -1763,67 +1837,104 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
               tabIndex={0}
               onClick={() => document.getElementById('global-terminal-input')?.focus()}
             >
-              {messages.map((msg, i) => {
-                const isSpecial = isValidElement(msg.content) &&
-                  ["terminal-ascii", "terminal-welcome", "terminal-warning"].includes((msg.content as React.ReactElement<any>).props.className);
+              <pre className="terminal-ascii">{geminiAscii}</pre>
+              <div className="terminal-welcome">
+                <div className="welcome-header">Mission Briefing for Lead Engineer:</div>
+                <div className="welcome-list">
+                  1. Architect of <span className="highlight">KnowMe CLI</span> - A Bash-native tool for hardware intelligence.
+                  <br />2. Recognized <span className="highlight">Google Gen AI Top Performer</span>.
+                  <br />3. Winner of the <span className="highlight">AWS Amazon Q CLI Challenge</span>.
+                  <br />4. Certified Professional: <span className="highlight">ISO / AI / Neo4j Graph DB</span>.
+                  <br />5. Expert in Large Language Models, Full Stack, and Multi-Modal SDKs (Gemini, Claude).
+                </div>
 
-                return (
-                  <div key={i} className={`terminal-line ${msg.type}`}>
-                    {!isSpecial && <span className="prompt gemini-prompt">&gt;</span>}
-                    <span className="command">{msg.content}</span>
-                  </div>
-                );
-              })}
+                <div className="terminal-warning-content" style={{ marginBottom: '0.5rem', opacity: 0.7 }}>
+                  [!] Warning: Running in high-privilege. Cannot be disabled in /settings. Hehe :)
+                </div>
 
-              {showMenu && (
+                <div className="welcome-footer">
+                  {activeTab === 'bash'
+                    ? "I've decoded 3 secure transmission channels. Select your uplink."
+                    : "Mission-critical modules decrypted. Select a destination coordinate."}
+                </div>
+              </div>
+
+              {activeTab === 'bash' ? (
+                <>
+                  {showMenu && (
+                    <div className="terminal-menu fzf-style">
+                      <div className="menu-header">Transmission channels:</div>
+                      {contactOptions.map((opt, i) => (
+                        <div
+                          key={opt.label}
+                          className={`menu-item ${selectedIndex === i ? 'active' : ''}`}
+                          onClick={() => {
+                            setSelectedIndex(i);
+                          }}
+                        >
+                          <span className="menu-cursor">{selectedIndex === i ? '>' : ' '}</span>
+                          <span className="menu-label">{opt.label}</span>
+                        </div>
+                      ))}
+                      <div className="menu-footer">
+                        [Total: {contactOptions.length}]
+                        <span className="menu-keys"> (Use arrows, enter to select)</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {messages.map((msg, i) => (
+                    <div key={i} className={`terminal-line ${msg.type}`}>
+                      <span className="prompt gemini-prompt">&gt;</span>
+                      <span className="command">{msg.content}</span>
+                    </div>
+                  ))}
+
+                  {isAITyping && (
+                    <div className="terminal-line ai">
+                      <span className="prompt gemini-prompt">&gt;</span>
+                      <span className="command typing-dots">Typing<span>.</span><span>.</span><span>.</span></span>
+                    </div>
+                  )}
+                  <div ref={terminalEndRef} />
+
+                  <form onSubmit={handleSend} className="terminal-input-wrap">
+                    <span className="prompt gemini-prompt">&gt;</span>
+                    <input
+                      id="global-terminal-input"
+                      type="text"
+                      className="terminal-input"
+                      placeholder="Type command..."
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      autoFocus
+                    />
+                    <div className="terminal-cursor"></div>
+                  </form>
+                </>
+              ) : (
                 <div className="terminal-menu fzf-style">
-                  <div className="menu-header">Transmission channels:</div>
-                  {contactOptions.map((opt, i) => (
+                  <div className="menu-header">Quick Navigation:</div>
+                  {navOptions.map((opt, i) => (
                     <div
                       key={opt.label}
-                      className={`menu-item ${selectedIndex === i ? 'active' : ''}`}
+                      className={`menu-item ${navSelectedIndex === i ? 'active' : ''}`}
                       onClick={() => {
-                        setSelectedIndex(i);
-                        setMessages(prev => [
-                          ...prev,
-                          { type: 'user', content: `select ${opt.label}` },
-                          { type: 'ai', content: `Redirecting to ${opt.label}... Sub-space link established.` }
-                        ]);
-                        window.open(opt.url, '_blank');
+                        setNavSelectedIndex(i);
+                        document.getElementById(opt.targetId)?.scrollIntoView({ behavior: 'smooth' });
+                        setIsOpen(false);
                       }}
                     >
-                      <span className="menu-cursor">{selectedIndex === i ? '>' : ' '}</span>
+                      <span className="menu-cursor">{navSelectedIndex === i ? '>' : ' '}</span>
                       <span className="menu-label">{opt.label}</span>
                     </div>
                   ))}
                   <div className="menu-footer">
-                    [Total: {contactOptions.length}]
-                    <span className="menu-keys"> (Use arrows, enter to select)</span>
+                    [Total: {navOptions.length}]
+                    <span className="menu-keys"> (Jump to section)</span>
                   </div>
                 </div>
               )}
-
-              {isAITyping && (
-                <div className="terminal-line ai">
-                  <span className="prompt gemini-prompt">&gt;</span>
-                  <span className="command typing-dots">Typing<span>.</span><span>.</span><span>.</span></span>
-                </div>
-              )}
-              <div ref={terminalEndRef} />
-
-              <form onSubmit={handleSend} className="terminal-input-wrap">
-                <span className="prompt gemini-prompt">&gt;</span>
-                <input
-                  id="global-terminal-input"
-                  type="text"
-                  className="terminal-input"
-                  placeholder="Type command..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  autoFocus
-                />
-                <div className="terminal-cursor"></div>
-              </form>
             </div>
             <div className="terminal-glow"></div>
           </div>
@@ -2041,15 +2152,14 @@ const Footer = () => (
 );
 
 const App = () => {
-  const [theme, setTheme] = useState('obsidian');
   const [loading, setLoading] = useState(true);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', 'obsidian');
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
-  }, [theme]);
+  }, []);
 
   // Global Ctrl+G handler
   useEffect(() => {
@@ -2094,7 +2204,6 @@ const App = () => {
           <CosmicBackground />
           <CustomCursor />
           <div className="grain-overlay"></div>
-          <ThemeSwitcher currentTheme={theme} setTheme={setTheme} />
           <Navbar />
           <Hero />
           <div className="content-wrap">
