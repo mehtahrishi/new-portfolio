@@ -894,48 +894,82 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { 
   );
 };
 
+const InfiniteSkillLoop = ({ items, direction = 'left', color, icon }: { items: string[], direction?: 'left' | 'right', color: string, icon: any }) => {
+  const doubledItems = [...items, ...items, ...items];
+  return (
+    <div className={`infinite-loop-container ${direction}`}>
+      <motion.div
+        className="infinite-loop-track"
+        animate={{
+          x: direction === 'left' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
+        }}
+        transition={{
+          duration: 20,
+          ease: "linear",
+          repeat: Infinity
+        }}
+      >
+        {doubledItems.map((item, idx) => (
+          <div key={`${item}-${idx}`} className="loop-item">
+            <SkillIcon name={item} icon={icon} color={color} size={32} />
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
 const SkillsSection = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 850);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const categories = [
+    {
+      title: "Dev Operations",
+      items: ["Git", "Docker", "Kubernetes", "AWS", "CI/CD", "Nginx", "GCP", "Apache", "Bash", "Linux", "Prometheus", "Redis"],
+      icon: Server,
+      color: "#6366f1",
+      direction: 'left' as const
+    },
+    {
+      title: "Full Stack Development",
+      items: ["ReactJS", "NextJS", "TypeScript", "NodeJS", "ExpressJS", "Tailwind CSS", "Framer Motion", "Python", "Flask", "JS", "HTML", "CSS", "Postman", "Puppeteer"],
+      icon: Code2,
+      color: "#22d3ee",
+      direction: 'right' as const
+    },
+    {
+      title: "AI Tools",
+      items: ["Copilot", "Claude", "Gemini", "Groq", "n8n", "Firebase Studio", "OpenAI"],
+      icon: Brain,
+      color: "#10b981",
+      direction: 'left' as const
+    },
+    {
+      title: "Databases",
+      items: ["Neo4j", "MongoDB", "PostgreSQL", "SQL", "Appwrite", "Drizzle ORM"],
+      icon: Database,
+      color: "#ec4899",
+      direction: 'right' as const
+    }
+  ];
 
   const pages = [
     {
       id: 0,
-      categories: [
-        {
-          title: "Dev Operations",
-          items: ["Git", "Docker", "Kubernetes", "AWS", "CI/CD", "Nginx", "GCP", "Apache", "Bash", "Linux", "Prometheus", "Redis"],
-          icon: Server,
-          color: "#6366f1",
-          layout: "mirrored" as const
-        },
-        {
-          title: "Databases",
-          items: ["Neo4j", "MongoDB", "PostgreSQL", "SQL", "Appwrite", "Drizzle ORM"],
-          icon: Database,
-          color: "#ec4899",
-          layout: "list" as const
-        }
-      ],
+      categories: [categories[0], categories[3]],
       grid: "1.4fr 0.6fr"
     },
     {
       id: 1,
-      categories: [
-        {
-          title: "AI Tools",
-          items: ["Copilot", "Claude", "Gemini", "Groq", "n8n", "Firebase Studio", "OpenAI"],
-          icon: Brain,
-          color: "#10b981",
-          layout: "list" as const
-        },
-        {
-          title: "Full Stack Development",
-          items: ["ReactJS", "NextJS", "TypeScript", "NodeJS", "ExpressJS", "Tailwind CSS", "Framer Motion", "Python", "Flask", "JS", "HTML", "CSS", "Postman", "Puppeteer"],
-          icon: Code2,
-          color: "#22d3ee",
-          layout: "mirrored" as const
-        }
-      ],
+      categories: [categories[2], categories[1]],
       grid: "0.6fr 1.4fr"
     }
   ];
@@ -944,6 +978,33 @@ const SkillsSection = () => {
     if (info.offset.x > 100 && currentPage > 0) setCurrentPage(0);
     else if (info.offset.x < -100 && currentPage < 1) setCurrentPage(1);
   };
+
+  if (isMobile) {
+    return (
+      <section id="skills" className="skills mobile-orbital">
+        <div className="section-header">
+          <h2 className="section-title">Technical <span className="gradient-text">Engine</span></h2>
+          <p>Orbital streams of expertise.</p>
+        </div>
+        <div className="orbital-container">
+          {categories.map((cat, idx) => (
+            <div key={idx} className="orbital-row">
+              <div className="orbital-title-wrap">
+                <cat.icon size={18} style={{ color: cat.color }} />
+                <h3 style={{ color: cat.color }}>{cat.title}</h3>
+              </div>
+              <InfiniteSkillLoop
+                items={cat.items}
+                direction={cat.direction}
+                color={cat.color}
+                icon={cat.icon}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="skills" className="skills">
@@ -970,12 +1031,12 @@ const SkillsSection = () => {
             }}
           >
             {pages[currentPage].categories.map((cat, i) => (
-              <div key={i} className={`skill-category-box glass-card ${cat.layout === 'mirrored' ? 'mirrored-card' : ''}`}>
+              <div key={i} className={`skill-category-box glass-card ${cat.title === 'Dev Operations' || cat.title === 'Full Stack Development' ? 'mirrored-card' : ''}`}>
                 <div className="category-header" style={{ color: cat.color }}>
                   <cat.icon size={20} />
                   <span>{cat.title}</span>
                 </div>
-                {cat.layout === 'mirrored' ? (
+                {(cat.title === 'Dev Operations' || cat.title === 'Full Stack Development') ? (
                   <div className="asteroid-cluster mirrored-cluster">
                     <div className="devops-special-grid">
                       {(() => {
