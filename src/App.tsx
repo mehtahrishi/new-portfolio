@@ -1,19 +1,43 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Zap, ArrowRight, Rocket, Database, Brain, Server, Shield, Cloud, X, FolderArchive } from 'lucide-react';
+import { Code2, Zap, ArrowRight, Rocket, Database, Brain, Server, Shield, Cloud, X, FolderArchive, ExternalLink, ChevronDown } from 'lucide-react';
 import { GoCopilot } from "react-icons/go";
-import { FaCss3Alt, FaAws } from "react-icons/fa";
+import { FaCss3Alt, FaAws, FaUserAstronaut } from "react-icons/fa";
 import { IoLogoJavascript, IoFlash } from "react-icons/io5";
 import { RiGeminiFill } from "react-icons/ri";
-import { SiFirebase, SiGnubash, SiGithubactions, SiDrizzle, SiClaude, SiPostgresql, SiPostman, SiPuppeteer } from "react-icons/si";
+import { SiFirebase, SiGnubash, SiGithubactions, SiDrizzle, SiClaude, SiPostgresql, SiPostman, SiPuppeteer, SiApollographql } from "react-icons/si";
 import { TbBrandMysql } from "react-icons/tb";
 import { AiOutlineOpenAI } from "react-icons/ai";
 import './App.css';
 
 // Components
+const Satellite = ({ radius, speed, delay }: { radius?: string, speed?: string, delay?: string }) => (
+  <div
+    className="cosmic-satellite"
+    style={{
+      '--orbit-radius': radius || '80px',
+      animation: `satellite-orbit ${speed || '40s'} infinite linear`,
+      animationDelay: delay || '0s'
+    } as any}
+  >
+    <div className="sat-body">
+      <div className="sat-antenna" />
+    </div>
+  </div>
+);
+
 const CosmicBackground = () => {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const stars = useMemo(() => {
-    return [...Array(200)].map((_, i) => ({
+    const count = isMobile ? 80 : 200;
+    return [...Array(count)].map((_, i) => ({
       id: i,
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
@@ -21,14 +45,13 @@ const CosmicBackground = () => {
       opacity: 0.2 + Math.random() * 0.8,
       duration: `${3 + Math.random() * 5}s`
     }));
-  }, []);
+  }, [isMobile]);
 
   const nebulae = useMemo(() => {
     return [
-      { id: 1, top: '10%', left: '15%', size: '60vw', color: 'radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%)', duration: '50s' },
-      { id: 2, top: '60%', left: '50%', size: '70vw', color: 'radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 70%)', duration: '60s' },
-      { id: 3, top: '30%', left: '70%', size: '50vw', color: 'radial-gradient(circle, rgba(34, 211, 238, 0.3), transparent 70%)', duration: '45s' },
-      { id: 4, top: '-10%', left: '60%', size: '40vw', color: 'radial-gradient(circle, rgba(244, 114, 182, 0.2), transparent 70%)', duration: '55s' },
+      { id: 1, top: '10%', left: '15%', size: '60vw', color: 'radial-gradient(circle, rgba(99, 102, 241, 0.7), transparent 75%)', duration: '50s' },
+      { id: 2, top: '60%', left: '50%', size: '70vw', color: 'radial-gradient(circle, rgba(168, 85, 247, 0.6), transparent 75%)', duration: '60s' },
+      { id: 3, top: '30%', left: '70%', size: '50vw', color: 'radial-gradient(circle, rgba(34, 211, 238, 0.5), transparent 75%)', duration: '45s' },
     ];
   }, []);
 
@@ -141,20 +164,23 @@ const CosmicBackground = () => {
           background: 'radial-gradient(circle at 30% 30%, #4f46e5, #000)',
           top: '10%',
           '--rev-duration': '120s',
-          '--rev-delay': '-5s'
+          '--rev-delay': '-5s',
+          '--glow-color': '#4f46e5'
         } as any}
       />
       <div
         className="planet"
         style={{
           width: '100px', height: '100px',
-          background: 'radial-gradient(circle at 30% 30%, #a855f7, #000)',
+          background: 'radial-gradient(circle at 30% 30%, #fcd34d, #92400e, #000)',
           top: '65%',
           '--rev-duration': '120s',
-          '--rev-delay': '-20s'
+          '--rev-delay': '-20s',
+          '--glow-color': '#fcd34d'
         } as any}
       >
         <div className="planet-ring" style={{ width: '160%', height: '40%' }} />
+        <Satellite radius="110px" speed="120s" />
       </div>
       <div
         className="planet"
@@ -163,7 +189,8 @@ const CosmicBackground = () => {
           background: 'radial-gradient(circle at 30% 30%, #22d3ee, #000)',
           top: '35%',
           '--rev-duration': '100s',
-          '--rev-delay': '-35s'
+          '--rev-delay': '-35s',
+          '--glow-color': '#22d3ee'
         } as any}
       />
 
@@ -175,21 +202,27 @@ const CosmicBackground = () => {
           background: 'radial-gradient(circle at 30% 30%, #ef4444, #7f1d1d)',
           top: '50%',
           '--rev-duration': '100s',
-          '--rev-delay': '-15s'
+          '--rev-delay': '-15s',
+          '--glow-color': '#ef4444'
         } as any}
-      />
+      >
+        <Satellite radius="45px" speed="8s" delay="-2s" />
+      </div>
 
       {/* Mini Jupiter */}
       <div
         className="planet"
         style={{
           width: '50px', height: '50px',
-          background: 'radial-gradient(circle at 30% 30%, #fcd34d, #92400e, #451a03)',
+          background: 'radial-gradient(circle at 30% 30%, #a855f7, #4c1d95, #000)',
           top: '25%',
           '--rev-duration': '150s',
-          '--rev-delay': '-45s'
+          '--rev-delay': '-45s',
+          '--glow-color': '#a855f7'
         } as any}
       />
+
+      <Satellite radius="200px" speed="180s" delay="-50s" />
 
       {/* Mini Neptune */}
       <div
@@ -199,7 +232,8 @@ const CosmicBackground = () => {
           background: 'radial-gradient(circle at 30% 30%, #3b82f6, #1e3a8a, #000)',
           top: '80%',
           '--rev-duration': '180s',
-          '--rev-delay': '-60s'
+          '--rev-delay': '-60s',
+          '--glow-color': '#3b82f6'
         } as any}
       />
 
@@ -210,9 +244,9 @@ const CosmicBackground = () => {
           width: '40px', height: '40px',
           background: 'radial-gradient(circle at 30% 30%, #4ade80, #3b82f6, #1e3a8a)',
           top: '45%',
-          boxShadow: '0 0 15px rgba(34, 211, 238, 0.4), inset -8px -8px 15px rgba(0,0,0,0.6)',
           '--rev-duration': '130s',
-          '--rev-delay': '-10s'
+          '--rev-delay': '-10s',
+          '--glow-color': '#5d96a9ff'
         } as any}
       >
         <div className="moon" />
@@ -226,21 +260,24 @@ const CosmicBackground = () => {
           background: 'radial-gradient(circle at 30% 30%, #fde68a, #92400e, #000)',
           top: '20%',
           '--rev-duration': '220s',
-          '--rev-delay': '-30s'
+          '--rev-delay': '-30s',
+          '--glow-color': '#fde68a'
         } as any}
       >
         <div className="planet-ring" style={{
           width: '220%',
           height: '50%',
           borderWidth: '8px',
-          borderColor: 'rgba(253, 230, 138, 0.2)',
-          boxShadow: '0 0 15px rgba(253, 230, 138, 0.1)'
+          borderColor: 'var(--glow-color)',
+          boxShadow: '0 0 15px var(--glow-color)',
+          opacity: 0.2
         }} />
         <div className="planet-ring" style={{
           width: '180%',
           height: '40%',
           borderWidth: '2px',
-          borderColor: 'rgba(253, 230, 138, 0.4)'
+          borderColor: 'var(--glow-color)',
+          opacity: 0.4
         }} />
       </div>
 
@@ -711,18 +748,31 @@ const CustomCursor = () => {
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
+
+  const navLinks = [
+    { name: "Summary", href: "#about" },
+    { name: "Skills", href: "#skills" },
+    { name: "Experience", href: "#experience" },
+    { name: "Education", href: "#education" },
+    { name: "Certificates", href: "#certs" },
+    { name: "Volunteer", href: "#volunteer" },
+    { name: "Connect", href: "#contact", cta: true }
+  ];
 
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`navbar ${scrolled ? 'scrolled' : ''}`}
+      className={`navbar ${scrolled ? 'scrolled' : ''} ${isOpen ? 'mobile-open' : ''}`}
     >
       <div className="nav-container">
         <motion.div
@@ -733,28 +783,54 @@ const Navbar = () => {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            whileHover={{ rotate: 360, transition: { duration: 8, repeat: Infinity, ease: "linear" } }}
             className="logo-icon-container"
           >
             <Zap className="logo-icon" size={24} />
           </motion.div>
-          <motion.span
-            whileHover={{ x: 5, color: 'var(--primary)' }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            HRISHI'S SPACE
-          </motion.span>
+          <span>HRISHI'S SPACE</span>
         </motion.div>
-        <div className="nav-links">
-          <a href="#about">Story</a>
-          <a href="#skills">Skills</a>
-          <a href="#experience">Experience</a>
-          <a href="#education">Education</a>
-          <a href="#certs">Certs</a>
-          <a href="#volunteer">Volunteer</a>
-          <a href="#contact" className="nav-cta">Connect</a>
+
+        {/* Desktop Links */}
+        <div className="nav-links desktop-links">
+          {navLinks.map((link) => (
+            <a key={link.name} href={link.href} className={link.cta ? 'nav-cta' : ''}>
+              {link.name}
+            </a>
+          ))}
         </div>
+
+        {/* Mobile Toggle */}
+        <button className="nav-mobile-toggle" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <ChevronDown style={{ transform: 'rotate(180deg)' }} /> : <ChevronDown />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ y: '-100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '-100%', opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="mobile-menu"
+          >
+            <div className="mobile-links">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className={link.cta ? 'mobile-cta' : ''}
+                  style={link.cta ? { display: 'flex', alignItems: 'center', gap: '8px' } : {}}
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 };
@@ -894,17 +970,21 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { 
   );
 };
 
-const InfiniteSkillLoop = ({ items, direction = 'left', color, icon }: { items: string[], direction?: 'left' | 'right', color: string, icon: any }) => {
+const InfiniteSkillLoop = ({ items, direction = 'left', color, icon, orientation = 'horizontal' }: { items: string[], direction?: 'left' | 'right' | 'up' | 'down', color: string, icon: any, orientation?: 'horizontal' | 'vertical' }) => {
   const doubledItems = [...items, ...items, ...items];
+  const isVertical = orientation === 'vertical';
+
   return (
-    <div className={`infinite-loop-container ${direction}`}>
+    <div className={`infinite-loop-container ${orientation} ${direction}`}>
       <motion.div
-        className="infinite-loop-track"
-        animate={{
+        className={`infinite-loop-track ${orientation}`}
+        animate={isVertical ? {
+          y: direction === 'down' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
+        } : {
           x: direction === 'left' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
         }}
         transition={{
-          duration: 20,
+          duration: isVertical ? 15 : 25,
           ease: "linear",
           repeat: Infinity
         }}
@@ -980,27 +1060,55 @@ const SkillsSection = () => {
   };
 
   if (isMobile) {
+    const devops = categories[0];
+    const web = categories[1];
+    const ai = categories[2];
+    const database = categories[3];
+
     return (
-      <section id="skills" className="skills mobile-orbital">
+      <section id="skills" className="skills mobile-engine-view">
         <div className="section-header">
           <h2 className="section-title">Technical <span className="gradient-text">Engine</span></h2>
-          <p>Orbital streams of expertise.</p>
+          <p>The machinery of innovation.</p>
         </div>
-        <div className="orbital-container">
-          {categories.map((cat, idx) => (
-            <div key={idx} className="orbital-row">
-              <div className="orbital-title-wrap">
-                <cat.icon size={18} style={{ color: cat.color }} />
-                <h3 style={{ color: cat.color }}>{cat.title}</h3>
-              </div>
-              <InfiniteSkillLoop
-                items={cat.items}
-                direction={cat.direction}
-                color={cat.color}
-                icon={cat.icon}
-              />
+
+        <div className="mobile-engine-layout">
+          {/* Top Row: DevOps */}
+          <div className="engine-row">
+            <div className="engine-label-wrap">
+              <devops.icon size={16} style={{ color: devops.color }} />
+              <span style={{ color: devops.color }}>{devops.title}</span>
             </div>
-          ))}
+            <InfiniteSkillLoop items={devops.items} direction="left" color={devops.color} icon={devops.icon} />
+          </div>
+
+          {/* Middle: 2 Columns */}
+          <div className="engine-mid-section">
+            <div className="engine-col">
+              <div className="engine-label-wrap vertical">
+                <web.icon size={16} style={{ color: web.color }} />
+                <span style={{ color: web.color }}>{web.title}</span>
+              </div>
+              <InfiniteSkillLoop items={web.items} direction="down" color={web.color} icon={web.icon} orientation="vertical" />
+            </div>
+
+            <div className="engine-col">
+              <div className="engine-label-wrap vertical">
+                <database.icon size={16} style={{ color: database.color }} />
+                <span style={{ color: database.color }}>{database.title}</span>
+              </div>
+              <InfiniteSkillLoop items={database.items} direction="up" color={database.color} icon={database.icon} orientation="vertical" />
+            </div>
+          </div>
+
+          {/* Bottom Row: AI */}
+          <div className="engine-row">
+            <div className="engine-label-wrap">
+              <ai.icon size={16} style={{ color: ai.color }} />
+              <span style={{ color: ai.color }}>{ai.title}</span>
+            </div>
+            <InfiniteSkillLoop items={ai.items} direction="right" color={ai.color} icon={ai.icon} />
+          </div>
         </div>
       </section>
     );
@@ -1410,6 +1518,14 @@ const EducationSection = () => {
 
 const CertsSection = () => {
   const [isScanning, setIsScanning] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const certs = [
     { name: "ISO/IEC 20000 IT Service Management Associate", issuer: "Skillfront", type: "Security" },
     { name: "ISO/IEC 27001 Information Security Associate", issuer: "Skillfront", type: "Security" },
@@ -1421,6 +1537,63 @@ const CertsSection = () => {
     { name: "Google Cloud Technical Series", issuer: "Google Cloud", type: "Cloud" },
     { name: "Vaadin 24 Certified Developer", issuer: "Vaadin", type: "Dev" }
   ];
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'Security': return Shield;
+      case 'AI': return Brain;
+      case 'Database': return Database;
+      case 'Automation': return Zap;
+      case 'API': return Code2;
+      case 'Cloud': return Cloud;
+      default: return Code2;
+    }
+  };
+
+  if (isMobile) {
+    const mobileCerts = certs.filter(c =>
+      !['Postman API Fundamentals', 'Google Cloud Technical Series', 'Vaadin 24 Certified Developer'].includes(c.name)
+    );
+
+    return (
+      <section id="certs" className="certs">
+        <div className="section-header">
+          <h2 className="section-title">Expert <span className="gradient-text">Validations</span></h2>
+        </div>
+
+        <div className="certs-mobile-list">
+          {mobileCerts.map((cert, i) => {
+            return (
+              <motion.a
+                key={i}
+                href="#"
+                className="cert-flap-item-link"
+                initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{
+                  duration: 0.5,
+                  delay: (i % 3) * 0.1,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15
+                }}
+                onClick={(e) => e.stopPropagation()}
+                style={{ display: 'block' }}
+              >
+                <div className="cert-flap-header glass-card">
+                  <div className="cert-flap-header-content">
+                    <span className="cert-flap-name">{cert.name}</span>
+                  </div>
+                  <ExternalLink size={16} className="cert-link-icon" />
+                </div>
+              </motion.a>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -1462,7 +1635,6 @@ const CertsSection = () => {
         onViewportLeave={() => setIsScanning(false)}
         variants={containerVariants}
       >
-        {/* Virtual Scanner Line - Uses hardware-accelerated 'y' */}
         <motion.div
           className="scanner-line"
           initial={{ y: 0 }}
@@ -1472,12 +1644,7 @@ const CertsSection = () => {
         />
         <div className="certs-grid">
           {certs.map((cert, i) => {
-            const Icon = cert.type === 'Security' ? Shield :
-              cert.type === 'AI' ? Brain :
-                cert.type === 'Database' ? Database :
-                  cert.type === 'Automation' ? Zap :
-                    cert.type === 'API' ? Code2 :
-                      cert.type === 'Cloud' ? Cloud : Code2;
+            const Icon = getIcon(cert.type);
 
             return (
               <motion.div
@@ -2004,6 +2171,83 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
     </AnimatePresence>
   );
 };
+const AstronautAIBubble = () => {
+  const [step, setStep] = useState(0); // 0: inactive, 1: gretting, 2: info, 3: logo
+
+  useEffect(() => {
+    const startSequence = () => setStep(1);
+
+    // Start after a small initial delay
+    const startTimer = setTimeout(startSequence, 3000);
+
+    // Repeat every 3 minutes
+    const interval = setInterval(startSequence, 180000);
+
+    return () => {
+      clearTimeout(startTimer);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handleNext = () => setStep(prev => prev + 1);
+
+  return (
+    <AnimatePresence>
+      {step > 0 && step <= 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.8 }}
+          animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+          exit={{ opacity: 0, y: 8, x: "-50%", scale: 0.9 }}
+          className="astronaut-bubble"
+          style={{ position: 'absolute', left: '50%' }}
+        >
+          {step === 1 && (
+            <span>"<Typewriter text="WHATSUP DOC?" delay={80} onComplete={() => setTimeout(handleNext, 2000)} />"</span>
+          )}
+          {step === 2 && (
+            <span style={{ fontSize: '0.65rem' }}>
+              "<Typewriter text="Did you know Hrishi is practicing for Apollo Graph Developer - Associate?" delay={40} onComplete={() => setTimeout(handleNext, 2500)} />"
+            </span>
+          )}
+          {step === 3 && (
+            <motion.div
+              initial={{ opacity: 0, filter: 'blur(5px)' }}
+              animate={{ opacity: 1, filter: 'blur(0px)' }}
+              className="apollo-reveal"
+              onAnimationComplete={() => setTimeout(() => setStep(0), 4000)}
+            >
+              <SiApollographql size={18} />
+              <span>APOLLO GRAPHQL :)</span>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const MobileRevealText = ({ text }: { text: string }) => {
+  return (
+    <h2 className="mobile-reveal-text">
+      {text.split("").map((char, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+          whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{
+            delay: i * 0.04,
+            duration: 0.4,
+            type: "spring",
+            stiffness: 100
+          }}
+          viewport={{ once: false }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </h2>
+  );
+};
 
 
 const GlitchText = ({ text }: { text: string }) => {
@@ -2012,6 +2256,7 @@ const GlitchText = ({ text }: { text: string }) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+';
 
   const scramble = useCallback(() => {
+    if (isGlitching) return;
     let iterations = 0;
     setIsGlitching(true);
 
@@ -2029,7 +2274,7 @@ const GlitchText = ({ text }: { text: string }) => {
       }
       iterations += 1 / 3;
     }, 30);
-  }, [text]);
+  }, [text, isGlitching]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -2068,7 +2313,17 @@ const ContactSection = ({ onOpenTerminal }: { onOpenTerminal: () => void }) => {
             whileInView={{ opacity: 1, y: 0 }}
             className="illuminate-header"
           >
-            <GlitchText text="READY TO ILLUMINATE?" />
+            {isMobile ? (
+              <div className="mobile-connect-text">
+                <MobileRevealText text="READY TO" />
+                <MobileRevealText text="CONNECT?" />
+              </div>
+            ) : (
+              <div className="desktop-illuminate-text">
+                <GlitchText text="READY TO" />
+                <GlitchText text="ILLUMINATE?" />
+              </div>
+            )}
             <div className="illuminate-bar"></div>
           </motion.div>
 
@@ -2087,7 +2342,8 @@ const ContactSection = ({ onOpenTerminal }: { onOpenTerminal: () => void }) => {
           <div className="activation-content">
             <div className="activation-icon-wrap">
               <div className="radar-ping"></div>
-              <Rocket className="activation-icon" />
+              {isMobile && <AstronautAIBubble />}
+              {isMobile ? <FaUserAstronaut className="activation-icon" /> : <Rocket className="activation-icon" />}
             </div>
 
             <div className="activation-tags">
