@@ -2713,7 +2713,7 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
     </AnimatePresence>
   );
 };
-const AstronautAIBubble = () => {
+const AstronautAIBubble = ({ isDesktop }: { isDesktop?: boolean }) => {
   const [step, setStep] = useState(0); // 0: inactive, 1: greeting, 2: info, 3: logo
   const [frameIndex, setFrameIndex] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
@@ -2819,8 +2819,8 @@ const AstronautAIBubble = () => {
         className="npc-ascii-container"
         style={{
           '--core-color': 'var(--primary)',
-          fontSize: '8px',
-          transform: 'translateY(-5px)'
+          fontSize: isDesktop ? '14px' : '8px',
+          transform: isDesktop ? 'translateY(45px)' : 'translateY(-5px)'
         } as any}
       >
         {currentFrames.join('\n')}
@@ -2945,7 +2945,7 @@ const ContactSection = ({ onOpenTerminal }: { onOpenTerminal: () => void }) => {
           <div className="activation-content">
             <div className="activation-icon-wrap">
               <div className="radar-ping"></div>
-              {isMobile ? <AstronautAIBubble /> : <Rocket className="activation-icon" />}
+              <AstronautAIBubble isDesktop={!isMobile} />
             </div>
 
             <div className="activation-tags">
