@@ -1,5 +1,5 @@
 ﻿.app,
-.app *:not(.terminal-container):not(.terminal-container *) {
+.app *:not(.terminal-container):not(.terminal-container *):not(.dock-content-body):not(.dock-content-body *) {
   cursor: none !important;
 }
 

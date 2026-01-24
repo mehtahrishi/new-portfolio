@@ -698,7 +698,7 @@ const CustomCursor = () => {
       const target = e.target as HTMLElement;
       setIsHovering(!!target.closest('button, a, .stack-card, .timeline-item, .edu-card, .cert-tag, .skill-icon-wrap'));
       setIsInGame(!!target.closest('.game-wrapper'));
-      setIsTerminal(!!target.closest('.terminal-container'));
+      setIsTerminal(!!target.closest('.terminal-container, .dock-content-body'));
     };
 
     window.addEventListener('mousemove', moveCursor);
