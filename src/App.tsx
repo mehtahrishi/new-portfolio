@@ -721,7 +721,7 @@ const CustomCursor = () => {
           scale: (isTerminal || isInGame) ? 0 : (isHovering ? 1.4 : 1),
           opacity: (isTerminal || isInGame) ? 0 : 1,
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 500, mass: 0.2 }}
+        transition={{ type: 'spring', damping: 30, stiffness: 200, mass: 0.5 }}
         style={{ pointerEvents: 'none' }}
       >
         <Rocket size={24} fill="currentColor" />
@@ -1894,12 +1894,24 @@ export const TacticalDataDock = ({ isOpen, setIsOpen }: { isOpen: boolean; setIs
 
   const currentCore = cores.find(c => c.key === activeCore) || cores[0];
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <motion.div
       className="tactical-dock"
       initial={false}
-      animate={{ x: isOpen ? 0 : 500 }}
-      transition={{ type: "spring", damping: 28, stiffness: 200 }}
+      animate={isMobile
+        ? { y: isOpen ? '-100%' : '-75px', x: 0 }
+        : { x: isOpen ? 0 : 500, y: 0 }
+      }
+      transition={{ type: "spring", damping: 30, stiffness: 200 }}
     >
       <div className="dock-trigger-cluster">
         {cores.map((core) => {
@@ -1944,7 +1956,7 @@ export const TacticalDataDock = ({ isOpen, setIsOpen }: { isOpen: boolean; setIs
               <h2 className="dock-title">{currentCore.name}</h2>
             </div>
             <button className="dock-close-btn" onClick={() => setIsOpen(false)}>
-              <ChevronRight size={24} />
+              {isMobile ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
             </button>
           </div>
 
@@ -2625,7 +2637,9 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   const navOptions = [
     { label: "SUMMARY", targetId: "about" },
     { label: "SKILLS", targetId: "skills" },
+    { label: "PROJECTS", targetId: "projects" },
     { label: "EXPERIENCE", targetId: "experience" },
+    { label: "VOLUNTEER", targetId: "volunteer" },
     { label: "EDUCATION", targetId: "education" },
     { label: "CERTIFICATIONS", targetId: "certs" }
   ];
