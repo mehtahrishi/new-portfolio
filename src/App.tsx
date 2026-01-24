@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ArrowRight, Rocket, Database, Brain, Shield, Cloud, X, FolderArchive, ExternalLink, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
+import { ArrowRight, Rocket, X, FolderArchive, ExternalLink, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { GoCopilot } from "react-icons/go";
-import { FaCss3Alt, FaAws, FaUserAstronaut } from "react-icons/fa";
+import { FaCss3Alt, FaAws } from "react-icons/fa";
 import { IoLogoJavascript, IoFlash } from "react-icons/io5";
 import { RiGeminiFill } from "react-icons/ri";
 import { SiFirebase, SiGnubash, SiGithubactions, SiDrizzle, SiClaude, SiPostgresql, SiPostman, SiPuppeteer, SiApollographql } from "react-icons/si";
@@ -324,6 +324,7 @@ const UfoIcon = ({ size = 20 }: { size?: number }) => (
 const Typewriter = ({ text, delay = 50, onComplete }: { text: string; delay?: number; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [index, setIndex] = useState(0);
+  const [hasCompleted, setHasCompleted] = useState(false);
 
   useEffect(() => {
     if (index < text.length) {
@@ -332,10 +333,11 @@ const Typewriter = ({ text, delay = 50, onComplete }: { text: string; delay?: nu
         setIndex((prev) => prev + 1);
       }, delay);
       return () => clearTimeout(timeout);
-    } else if (onComplete) {
+    } else if (onComplete && !hasCompleted) {
+      setHasCompleted(true);
       onComplete();
     }
-  }, [index, text, delay, onComplete]);
+  }, [index, text, delay, onComplete, hasCompleted]);
 
   return <>{displayedText}</>;
 };
@@ -956,7 +958,7 @@ const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
   );
 };
 
-const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { name: string; icon: any; color: string; size?: number, delay?: number }) => {
+const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0, onLoad }: { name: string; icon: any; color: string; size?: number, delay?: number, onLoad?: () => void }) => {
   const [imgError, setImgError] = useState(false);
 
   // Mapping names to Simple Icons slugs
@@ -1000,7 +1002,11 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { 
           alt={name}
           className="skill-brand-icon"
           style={{ width: `${size}px`, height: `${size}px`, objectFit: 'contain' }}
-          onError={() => setImgError(true)}
+          onError={() => {
+            setImgError(true);
+            onLoad?.();
+          }}
+          onLoad={() => onLoad?.()}
         />
       );
     }
@@ -1008,62 +1014,92 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0 }: { 
   };
 
   return (
-    <motion.div
-      className="skill-icon-wrap"
-      initial={{ scale: 0, opacity: 0, y: 20, filter: "blur(10px) brightness(0)" }}
-      whileInView={{
-        scale: [0, 1.3, 1],
-        opacity: 1,
-        y: 0,
-        filter: ["blur(10px) brightness(2)", "blur(0px) brightness(1)"],
-        transition: {
-          delay: delay,
-          duration: 0.8,
-          times: [0, 0.6, 1],
-          type: "spring",
-          stiffness: 260,
-          damping: 20
-        }
-      }}
-      viewport={{ once: true }}
-      style={{ color } as any}
+    <div
+      className="skill-icon-outer"
+      style={{ width: `${size + 24}px`, height: `${size + 24}px` }}
     >
       <motion.div
-        whileHover={{ scale: 1.25 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}
+        className="skill-icon-wrap"
+        initial={{ scale: 0, opacity: 0, y: 20, filter: "blur(10px) brightness(0)" }}
+        whileInView={{
+          scale: [0, 1.3, 1],
+          opacity: 1,
+          y: 0,
+          filter: ["blur(10px) brightness(2)", "blur(0px) brightness(1)"],
+          transition: {
+            delay: delay,
+            duration: 0.8,
+            times: [0, 0.6, 1],
+            type: "spring",
+            stiffness: 260,
+            damping: 20
+          }
+        }}
+        viewport={{ once: true }}
+        style={{ color } as any}
       >
-        {renderIcon()}
+        <motion.div
+          whileHover={{ scale: 1.25 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}
+        >
+          {(() => {
+            const element = renderIcon();
+            // If it's a component (Lucide/React Icon), it's effectively "loaded" immediately
+            if (React.isValidElement(element) && element.type !== 'img') {
+              setTimeout(() => onLoad?.(), 0);
+            }
+            return element;
+          })()}
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
 const InfiniteSkillLoop = ({ items, direction = 'left', color, icon, orientation = 'horizontal' }: { items: string[], direction?: 'left' | 'right' | 'up' | 'down', color: string, icon: any, orientation?: 'horizontal' | 'vertical' }) => {
+  const [loadedCount, setLoadedCount] = useState(0);
   const doubledItems = [...items, ...items, ...items];
   const isVertical = orientation === 'vertical';
+  const isAllLoaded = loadedCount >= items.length;
 
   return (
-    <div className={`infinite-loop-container ${orientation} ${direction}`}>
+    <div className={`infinite-loop-container ${orientation} ${direction} ${isAllLoaded ? 'ready' : 'loading'}`}>
       <motion.div
         className={`infinite-loop-track ${orientation}`}
-        animate={isVertical ? {
+        animate={isAllLoaded ? (isVertical ? {
           y: direction === 'down' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
         } : {
           x: direction === 'left' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
-        }}
+        }) : {}}
         transition={{
           duration: isVertical ? 15 : 25,
           ease: "linear",
           repeat: Infinity
         }}
+        style={{ opacity: isAllLoaded ? 1 : 0 }}
       >
         {doubledItems.map((item, idx) => (
           <div key={`${item}-${idx}`} className="loop-item">
-            <SkillIcon name={item} icon={icon} color={color} size={32} />
+            <SkillIcon
+              name={item}
+              icon={icon}
+              color={color}
+              size={32}
+              onLoad={() => idx < items.length && setLoadedCount(prev => prev + 1)}
+            />
           </div>
         ))}
       </motion.div>
+      {!isAllLoaded && (
+        <div className="loop-placeholder">
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="placeholder-glow"
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -1071,6 +1107,7 @@ const InfiniteSkillLoop = ({ items, direction = 'left', color, icon, orientation
 const SkillsSection = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [phase, setPhase] = useState<'idle' | 'loading' | 'revealed'>('idle');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 850);
@@ -1078,6 +1115,13 @@ const SkillsSection = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (phase === 'loading') {
+      const timer = setTimeout(() => setPhase('revealed'), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
 
   const categories = SKILLS_CATEGORIES;
 
@@ -1099,190 +1143,226 @@ const SkillsSection = () => {
     else if (info.offset.x < -100 && currentPage < 1) setCurrentPage(1);
   };
 
-  if (isMobile) {
-    const devops = categories[0];
-    const web = categories[1];
-    const ai = categories[2];
-    const database = categories[3];
-
-    return (
-      <section id="skills" className="skills mobile-engine-view">
-        <div className="section-header">
-          <h2 className="section-title">Technical <span className="gradient-text">Engine</span></h2>
-          <p>The machinery of innovation.</p>
-        </div>
-
-        <div className="mobile-engine-layout">
-          {/* Top Row: DevOps */}
-          <div className="engine-row">
-            <div className="engine-label-wrap">
-              <devops.icon size={16} style={{ color: devops.color }} />
-              <span style={{ color: devops.color }}>{devops.title}</span>
-            </div>
-            <InfiniteSkillLoop items={devops.items} direction="left" color={devops.color} icon={devops.icon} />
-          </div>
-
-          {/* Middle: 2 Columns */}
-          <div className="engine-mid-section">
-            <div className="engine-col">
-              <div className="engine-label-wrap vertical">
-                <web.icon size={16} style={{ color: web.color }} />
-                <span style={{ color: web.color }}>{web.title}</span>
-              </div>
-              <InfiniteSkillLoop items={web.items} direction="down" color={web.color} icon={web.icon} orientation="vertical" />
-            </div>
-
-            <div className="engine-col">
-              <div className="engine-label-wrap vertical">
-                <database.icon size={16} style={{ color: database.color }} />
-                <span style={{ color: database.color }}>{database.title}</span>
-              </div>
-              <InfiniteSkillLoop items={database.items} direction="up" color={database.color} icon={database.icon} orientation="vertical" />
-            </div>
-          </div>
-
-          {/* Bottom Row: AI */}
-          <div className="engine-row">
-            <div className="engine-label-wrap">
-              <ai.icon size={16} style={{ color: ai.color }} />
-              <span style={{ color: ai.color }}>{ai.title}</span>
-            </div>
-            <InfiniteSkillLoop items={ai.items} direction="right" color={ai.color} icon={ai.icon} />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section id="skills" className="skills">
-      <div className="section-header">
+    <section id="skills" className={`skills ${isMobile ? 'mobile-engine-view' : ''}`}>
+      <motion.div
+        className="section-header"
+        onViewportEnter={() => phase === 'idle' && setPhase('loading')}
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <h2 className="section-title">Technical <span className="gradient-text">Engine</span></h2>
-        <p>A categorized asteroid field of expertise.</p>
-      </div>
-      <div className="skills-carousel-viewport">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={currentPage}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={handleDragEnd}
-            initial={{ rotateY: currentPage === 0 ? 45 : -45, z: -150, opacity: 0 }}
-            animate={{ rotateY: 0, z: 0, opacity: 1 }}
-            exit={{ rotateY: currentPage === 0 ? -45 : 45, z: -150, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className="skills-grid-bento swiper-page"
-            style={{
-              gridTemplateColumns: pages[currentPage].grid,
-              perspective: "1000px",
-              cursor: "grab"
-            }}
-          >
-            {pages[currentPage].categories.map((cat, i) => (
-              <div key={i} className={`skill-category-box glass-card ${cat.title === 'Dev Operations' || cat.title === 'Full Stack Development' ? 'mirrored-card' : ''}`}>
-                <div className="category-header" style={{ color: cat.color }}>
-                  <cat.icon size={20} />
-                  <span>{cat.title}</span>
-                </div>
-                {(cat.title === 'Dev Operations' || cat.title === 'Full Stack Development') ? (
-                  <div className="asteroid-cluster mirrored-cluster">
-                    <div className="devops-special-grid">
-                      {(() => {
-                        const half = Math.ceil(cat.items.length / 2);
-                        const left = cat.items.slice(0, half);
-                        const right = cat.items.slice(half);
-                        const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
+        <p>{phase === 'revealed' ? (isMobile ? 'The machinery of innovation.' : 'A categorized field of expertise.') : 'Establishing neural link...'}</p>
+      </motion.div>
 
-                        return left.map((item: string, idx: number) => (
-                          <div key={item} style={{ display: 'contents' }}>
-                            <SkillIcon
-                              name={item}
-                              icon={cat.icon}
-                              color={cat.color}
-                              size={24}
-                              delay={baseDelay + (idx * 0.1)}
-                            />
-                            <motion.span
-                              className="skill-label"
-                              initial={{ opacity: 0, x: -10 }}
-                              whileInView={{
-                                opacity: 1,
-                                x: 0,
-                                transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
-                              }}
-                              viewport={{ once: true }}
-                            >
-                              {item}
-                            </motion.span>
-                            {right[idx] ? (
-                              <>
-                                <motion.span
-                                  className="skill-label text-right"
-                                  initial={{ opacity: 0, x: 10 }}
-                                  whileInView={{
-                                    opacity: 1,
-                                    x: 0,
-                                    transition: { delay: baseDelay + ((cat.items.length - 1 - idx) * 0.1) + 0.1 }
-                                  }}
-                                  viewport={{ once: true }}
-                                >
-                                  {right[idx]}
-                                </motion.span>
-                                <SkillIcon
-                                  name={right[idx]}
-                                  icon={cat.icon}
-                                  color={cat.color}
-                                  size={24}
-                                  delay={baseDelay + ((cat.items.length - 1 - idx) * 0.1)}
-                                />
-                              </>
-                            ) : (
-                              <><div /><div /></>
-                            )}
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="asteroid-cluster list-cluster">
-                    {cat.items.map((item, idx) => {
-                      const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
-                      return (
-                        <div key={item} className="skill-list-item">
-                          <SkillIcon
-                            name={item}
-                            icon={cat.icon}
-                            color={cat.color}
-                            size={28}
-                            delay={baseDelay + (idx * 0.1)}
-                          />
-                          <motion.span
-                            className="skill-label"
-                            initial={{ opacity: 0, x: 10 }}
-                            whileInView={{
-                              opacity: 1,
-                              x: 0,
-                              transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
-                            }}
-                            viewport={{ once: true }}
-                          >
-                            {item}
-                          </motion.span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+      <div className="skills-carousel-viewport">
+        <AnimatePresence mode="wait">
+          {phase !== 'revealed' ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="skills-loading-state"
+            >
+              <div className="buffering-wrap">
+                <motion.div
+                  className="buffering-bar"
+                  initial={{ width: "0%" }}
+                  animate={phase === 'loading' ? { width: "100%" } : {}}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                />
+                <motion.span
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="loading-text"
+                >
+                  CALIBRATING_CORE_LOGS.EXE...
+                </motion.span>
               </div>
-            ))}
-          </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              {isMobile ? (
+                (() => {
+                  const DevOpsIcon = SKILLS_CATEGORIES[0].icon;
+                  const WebIcon = SKILLS_CATEGORIES[1].icon;
+                  const DatabaseIcon = SKILLS_CATEGORIES[3].icon;
+                  const AIIcon = SKILLS_CATEGORIES[2].icon;
+
+                  return (
+                    <div className="mobile-engine-layout">
+                      {/* Top Row: DevOps */}
+                      <div className="engine-row">
+                        <div className="engine-label-wrap">
+                          <DevOpsIcon size={16} style={{ color: SKILLS_CATEGORIES[0].color }} />
+                          <span style={{ color: SKILLS_CATEGORIES[0].color }}>{SKILLS_CATEGORIES[0].title}</span>
+                        </div>
+                        <InfiniteSkillLoop items={SKILLS_CATEGORIES[0].items} direction="left" color={SKILLS_CATEGORIES[0].color} icon={DevOpsIcon} />
+                      </div>
+
+                      {/* Middle: 2 Columns */}
+                      <div className="engine-mid-section">
+                        <div className="engine-col">
+                          <div className="engine-label-wrap vertical">
+                            <WebIcon size={16} style={{ color: SKILLS_CATEGORIES[1].color }} />
+                            <span style={{ color: SKILLS_CATEGORIES[1].color }}>{SKILLS_CATEGORIES[1].title}</span>
+                          </div>
+                          <InfiniteSkillLoop items={SKILLS_CATEGORIES[1].items} direction="down" color={SKILLS_CATEGORIES[1].color} icon={WebIcon} orientation="vertical" />
+                        </div>
+
+                        <div className="engine-col">
+                          <div className="engine-label-wrap vertical">
+                            <DatabaseIcon size={16} style={{ color: SKILLS_CATEGORIES[3].color }} />
+                            <span style={{ color: SKILLS_CATEGORIES[3].color }}>{SKILLS_CATEGORIES[3].title}</span>
+                          </div>
+                          <InfiniteSkillLoop items={SKILLS_CATEGORIES[3].items} direction="up" color={SKILLS_CATEGORIES[3].color} icon={DatabaseIcon} orientation="vertical" />
+                        </div>
+                      </div>
+
+                      {/* Bottom Row: AI */}
+                      <div className="engine-row">
+                        <div className="engine-label-wrap">
+                          <AIIcon size={16} style={{ color: SKILLS_CATEGORIES[2].color }} />
+                          <span style={{ color: SKILLS_CATEGORIES[2].color }}>{SKILLS_CATEGORIES[2].title}</span>
+                        </div>
+                        <InfiniteSkillLoop items={SKILLS_CATEGORIES[2].items} direction="right" color={SKILLS_CATEGORIES[2].color} icon={AIIcon} />
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                <>
+                  <motion.div
+                    key={currentPage}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={handleDragEnd}
+                    initial={{ rotateY: currentPage === 0 ? 45 : -45, z: -150, opacity: 0 }}
+                    animate={{ rotateY: 0, z: 0, opacity: 1 }}
+                    exit={{ rotateY: currentPage === 0 ? -45 : 45, z: -150, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                    className="skills-grid-bento swiper-page"
+                    style={{
+                      gridTemplateColumns: pages[currentPage].grid,
+                      perspective: "1000px",
+                      cursor: "grab"
+                    }}
+                  >
+                    {pages[currentPage].categories.map((cat, i) => (
+                      <div key={i} className={`skill-category-box glass-card ${cat.title === 'Dev Operations' || cat.title === 'Full Stack Development' ? 'mirrored-card' : ''}`}>
+                        <div className="category-header" style={{ color: cat.color }}>
+                          <cat.icon size={20} />
+                          <span>{cat.title}</span>
+                        </div>
+                        {(cat.title === 'Dev Operations' || cat.title === 'Full Stack Development') ? (
+                          <div className="asteroid-cluster mirrored-cluster">
+                            <div className="devops-special-grid">
+                              {(() => {
+                                const half = Math.ceil(cat.items.length / 2);
+                                const left = cat.items.slice(0, half);
+                                const right = cat.items.slice(half);
+                                const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
+
+                                return left.map((item: string, idx: number) => (
+                                  <div key={item} style={{ display: 'contents' }}>
+                                    <SkillIcon
+                                      name={item}
+                                      icon={cat.icon}
+                                      color={cat.color}
+                                      size={24}
+                                      delay={baseDelay + (idx * 0.1)}
+                                    />
+                                    <motion.span
+                                      className="skill-label"
+                                      initial={{ opacity: 0, x: -10 }}
+                                      whileInView={{
+                                        opacity: 1,
+                                        x: 0,
+                                        transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
+                                      }}
+                                      viewport={{ once: true }}
+                                    >
+                                      {item}
+                                    </motion.span>
+                                    {right[idx] ? (
+                                      <>
+                                        <motion.span
+                                          className="skill-label text-right"
+                                          initial={{ opacity: 0, x: 10 }}
+                                          whileInView={{
+                                            opacity: 1,
+                                            x: 0,
+                                            transition: { delay: baseDelay + ((cat.items.length - 1 - idx) * 0.1) + 0.1 }
+                                          }}
+                                          viewport={{ once: true }}
+                                        >
+                                          {right[idx]}
+                                        </motion.span>
+                                        <SkillIcon
+                                          name={right[idx]}
+                                          icon={cat.icon}
+                                          color={cat.color}
+                                          size={24}
+                                          delay={baseDelay + ((cat.items.length - 1 - idx) * 0.1)}
+                                        />
+                                      </>
+                                    ) : (
+                                      <><div /><div /></>
+                                    )}
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="asteroid-cluster list-cluster">
+                            {cat.items.map((item, idx) => {
+                              const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
+                              return (
+                                <div key={item} className="skill-list-item">
+                                  <SkillIcon
+                                    name={item}
+                                    icon={cat.icon}
+                                    color={cat.color}
+                                    size={28}
+                                    delay={baseDelay + (idx * 0.1)}
+                                  />
+                                  <motion.span
+                                    className="skill-label"
+                                    initial={{ opacity: 0, x: 10 }}
+                                    whileInView={{
+                                      opacity: 1,
+                                      x: 0,
+                                      transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
+                                    }}
+                                    viewport={{ once: true }}
+                                  >
+                                    {item}
+                                  </motion.span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </motion.div>
+                  <div className="pagination-dots">
+                    {pages.map((_, i) => (
+                      <div key={i} className={`dot ${currentPage === i ? 'active' : ''}`} onClick={() => setCurrentPage(i)} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
-        <div className="pagination-dots">
-          {pages.map((_, i) => (
-            <div key={i} className={`dot ${currentPage === i ? 'active' : ''}`} onClick={() => setCurrentPage(i)} />
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -2634,57 +2714,118 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   );
 };
 const AstronautAIBubble = () => {
-  const [step, setStep] = useState(0); // 0: inactive, 1: gretting, 2: info, 3: logo
+  const [step, setStep] = useState(0); // 0: inactive, 1: greeting, 2: info, 3: logo
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [isTalking, setIsTalking] = useState(false);
+
+  const frames = {
+    idle: ["▄▄▄▄▄▄▄▄▄", "█ ||||| █", "█  o o  █", "█   u   █", "█       █", "▀▀▀▀▀▀▀▀▀"],
+    happy: ["▄▄▄▄▄▄▄▄▄", "█ ||||| █", "█  ^ ^  █", "█   u   █", "█       █", "▀▀▀▀▀▀▀▀▀"],
+    talking: [
+      ["▄▄▄▄▄▄▄▄▄", "█ ||||| █", "█  o o  █", "█   O   █", "█       █", "▀▀▀▀▀▀▀▀▀"],
+      ["▄▄▄▄▄▄▄▄▄", "█ ||||| █", "█  o o  █", "█   -   █", "█       █", "▀▀▀▀▀▀▀▀▀"]
+    ]
+  };
 
   useEffect(() => {
     const startSequence = () => setStep(1);
-
-    // Start after a small initial delay
     const startTimer = setTimeout(startSequence, 3000);
-
-    // Repeat every 3 minutes
     const interval = setInterval(startSequence, 180000);
-
     return () => {
       clearTimeout(startTimer);
       clearInterval(interval);
     };
   }, []);
 
-  const handleNext = () => setStep(prev => prev + 1);
+  useEffect(() => {
+    let talkInterval: any;
+    if (isTalking) {
+      talkInterval = setInterval(() => {
+        setFrameIndex(prev => (prev + 1) % 2);
+      }, 200);
+    } else {
+      setFrameIndex(0);
+    }
+    return () => clearInterval(talkInterval);
+  }, [isTalking]);
+
+  const handleStepComplete = useCallback(() => {
+    setIsTalking(false);
+    setTimeout(() => {
+      setStep(prev => {
+        if (prev === 3) return 0;
+        return prev + 1;
+      });
+    }, 1500);
+  }, []);
+
+  const currentFrames = step === 0 ? frames.idle :
+    step === 3 ? frames.happy :
+      isTalking ? frames.talking[frameIndex] : frames.idle;
 
   return (
-    <AnimatePresence>
-      {step > 0 && step <= 3 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.8 }}
-          animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
-          exit={{ opacity: 0, y: 8, x: "-50%", scale: 0.9 }}
-          className="astronaut-bubble"
-          style={{ position: 'absolute', left: '50%' }}
-        >
-          {step === 1 && (
-            <span>"<Typewriter text="WHATSUP DOC?" delay={80} onComplete={() => setTimeout(handleNext, 2000)} />"</span>
-          )}
-          {step === 2 && (
+    <div className="companion-integrated-wrap">
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+            exit={{ opacity: 0, y: 8, x: "-50%", scale: 0.9 }}
+            className="astronaut-bubble"
+            style={{ position: 'absolute', left: '50%' }}
+            onAnimationComplete={() => setIsTalking(true)}
+          >
+            <span>"<Typewriter text="WHATSUP DOC?" delay={80} onComplete={handleStepComplete} />"</span>
+          </motion.div>
+        )}
+        {step === 2 && (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+            exit={{ opacity: 0, y: 8, x: "-50%", scale: 0.9 }}
+            className="astronaut-bubble"
+            style={{ position: 'absolute', left: '50%' }}
+            onAnimationComplete={() => setIsTalking(true)}
+          >
             <span style={{ fontSize: '0.65rem' }}>
-              "<Typewriter text="Did you know Hrishi is practicing for Apollo Graph Developer - Associate?" delay={40} onComplete={() => setTimeout(handleNext, 2500)} />"
+              "<Typewriter text="Did you know Hrishi is practicing for Apollo Graph Developer - Associate?" delay={40} onComplete={handleStepComplete} />"
             </span>
-          )}
-          {step === 3 && (
+          </motion.div>
+        )}
+        {step === 3 && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+            exit={{ opacity: 0, y: 8, x: "-50%", scale: 0.9 }}
+            className="astronaut-bubble"
+            style={{ position: 'absolute', left: '50%' }}
+          >
             <motion.div
               initial={{ opacity: 0, filter: 'blur(5px)' }}
               animate={{ opacity: 1, filter: 'blur(0px)' }}
               className="apollo-reveal"
-              onAnimationComplete={() => setTimeout(() => setStep(0), 4000)}
+              onAnimationComplete={() => setTimeout(handleStepComplete, 3000)}
             >
               <SiApollographql size={18} />
               <span>APOLLO GRAPHQL :)</span>
             </motion.div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div
+        className="npc-ascii-container"
+        style={{
+          '--core-color': 'var(--primary)',
+          fontSize: '8px',
+          transform: 'translateY(-5px)'
+        } as any}
+      >
+        {currentFrames.join('\n')}
+      </div>
+    </div>
   );
 };
 
@@ -2804,8 +2945,7 @@ const ContactSection = ({ onOpenTerminal }: { onOpenTerminal: () => void }) => {
           <div className="activation-content">
             <div className="activation-icon-wrap">
               <div className="radar-ping"></div>
-              {isMobile && <AstronautAIBubble />}
-              {isMobile ? <FaUserAstronaut className="activation-icon" /> : <Rocket className="activation-icon" />}
+              {isMobile ? <AstronautAIBubble /> : <Rocket className="activation-icon" />}
             </div>
 
             <div className="activation-tags">
