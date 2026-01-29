@@ -418,12 +418,12 @@ export const NAV_OPTIONS = [
 ];
 
 export const GAME_SECRETS = [
-    "Why did the developer go broke? Because he used up all his cache.",
-    "There are 10 types of people in the world: those who understand binary, and those who don't.",
-    "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'",
-    "I'm not lazy, I'm just in energy-saving mode.",
-    "Programmer: A machine that turns caffeine into code.",
-    "The best thing about a boolean is even if you are wrong, you are only off by a bit."
+    "Nice game! By the way, Hrishi is a Google Gen AI Participant and Gemini Certified.",
+    "Good job! Did you know Hrishi has 9+ certifications in ISO Security, Neo4j, AWS, and more?",
+    "Well played! Hrishi is a Lyzr AI Certified Builder crafting intelligent automation.",
+    "Great effort! Hrishi is a Google Cloud Skills Boost Innovator solving cloud-native problems.",
+    "Impressive! Hrishi is a Neo4j Certified Professional and graph database architect.",
+    "You survived! Fun fact: Hrishi is an AWS Databricks Platform Architect scaling data in the cloud."
 ];
 
 export const getCertIcon = (type: string) => {

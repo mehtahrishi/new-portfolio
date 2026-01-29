@@ -628,7 +628,7 @@ const SpaceGame = () => {
               const survivedSecs = Math.floor((missionProgress / 100) * 90);
               const timeLeftSecs = Math.max(0, 90 - survivedSecs);
               return (
-                <div className="result-stats" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="result-stats" style={{ display: 'flex', flexDirection: 'row', gap: '2rem', justifyContent: 'center' }}>
                   <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>SURVIVED: <span style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(survivedSecs)}</span></div>
                   <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>TIME LEFT: <span style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 800 }}>{formatTime(timeLeftSecs)}</span></div>
                 </div>
@@ -637,7 +637,27 @@ const SpaceGame = () => {
             <div className="result-secret">
               "<Typewriter text={finalSecret} delay={30} />"
             </div>
-            <button className="restart-btn" onClick={resetGame}>Try Again</button>
+            <div style={{
+              marginTop: '1.5rem',
+              fontSize: '0.85rem',
+              opacity: 0.7,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              justifyContent: 'center'
+            }}>
+              Press <kbd style={{
+                padding: '2px 6px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '3px',
+                fontSize: '0.8rem'
+              }}>Ctrl</kbd> + <kbd style={{
+                padding: '2px 6px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '3px',
+                fontSize: '0.8rem'
+              }}>L</kbd> to reset and play again
+            </div>
           </div>
         )}
 
@@ -903,6 +923,80 @@ const Navbar = () => {
   );
 };
 
+const ParticleText = ({ text }: { text: string }) => {
+  const letters = text.split('');
+
+  return (
+    <span className="particle-text-container">
+      {letters.map((letter, letterIndex) => {
+        // Create unique push patterns for each letter
+        const pushDelay = 2 + letterIndex * 0.15; // Start pushing after particle assembly
+        const pushPattern = letterIndex % 2 === 0
+          ? [0, -8, 0, 8, 0]  // Even letters: left then right
+          : [0, 8, 0, -8, 0]; // Odd letters: right then left
+
+        return (
+          <span key={letterIndex} className="particle-letter-wrap">
+            {/* Actual letter that fades in then pushes */}
+            <motion.span
+              className="particle-letter gradient-text"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                x: pushPattern
+              }}
+              transition={{
+                opacity: { delay: 0.8 + letterIndex * 0.1, duration: 0.3 },
+                x: {
+                  delay: pushDelay,
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 1,
+                  ease: "easeInOut"
+                }
+              }}
+            >
+              {letter}
+            </motion.span>
+
+            {/* Particles for each letter */}
+            {[...Array(8)].map((_, particleIndex) => {
+              const angle = (particleIndex / 8) * Math.PI * 2;
+              const distance = 60 + Math.random() * 40;
+              const startX = Math.cos(angle) * distance;
+              const startY = Math.sin(angle) * distance;
+
+              return (
+                <motion.span
+                  key={particleIndex}
+                  className="particle-dot"
+                  initial={{
+                    x: startX,
+                    y: startY,
+                    opacity: 1,
+                    scale: 0.5
+                  }}
+                  animate={{
+                    x: 0,
+                    y: 0,
+                    opacity: 0,
+                    scale: 1
+                  }}
+                  transition={{
+                    delay: 0.5 + letterIndex * 0.1 + particleIndex * 0.02,
+                    duration: 0.6,
+                    ease: "easeOut"
+                  }}
+                />
+              );
+            })}
+          </span>
+        );
+      })}
+    </span>
+  );
+};
+
 const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
   return (
     <section className="hero">
@@ -912,13 +1006,32 @@ const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="hero-badge">DevSecOps & Cloud Engineer</span>
+          <div className="hero-badge">
+            <span>Software Developer</span>
+            <motion.span
+              className="hero-separator"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5, type: "spring", stiffness: 200 }}
+            >
+              |
+            </motion.span>
+            <span>AIML Engineer</span>
+            <motion.span
+              className="hero-separator"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5, type: "spring", stiffness: 200 }}
+            >
+              |
+            </motion.span>
+            <span>DevOps</span>
+          </div>
           <h1 className="hero-title">
-            I build <span className="gradient-text">secure systems</span> <br />
-            in the digital void.
+            Hey, I am <ParticleText text="Hrishi" />
           </h1>
           <p className="hero-description">
-            Hey, I'm <span className="text-white">Hrishi</span>. A versatile DevSecOps Engineer specializing in secure full-stack development,
+            A versatile DevOps Engineer specializing in secure full-stack development,
             cloud infrastructure, and AI/ML workflows.
           </p>
           <div className="hero-actions">
@@ -945,14 +1058,23 @@ const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
         className="hero-scroll"
+        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="asteroid-arrow">
-          <div className="arrow-top-row">
-            <div className="asteroid-dot small" />
-            <div className="asteroid-dot small" />
-          </div>
-          <div className="asteroid-dot medium" />
-        </div>
+        <motion.div
+          className="traffic-arrow"
+          animate={{
+            opacity: [0.3, 1, 0.3],
+            scale: [0.9, 1.1, 0.9]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <ChevronDown size={32} />
+        </motion.div>
       </motion.div>
     </section>
   );
@@ -1118,7 +1240,7 @@ const SkillsSection = () => {
 
   useEffect(() => {
     if (phase === 'loading') {
-      const timer = setTimeout(() => setPhase('revealed'), 600);
+      const timer = setTimeout(() => setPhase('revealed'), 200);
       return () => clearTimeout(timer);
     }
   }, [phase]);
@@ -1169,7 +1291,7 @@ const SkillsSection = () => {
                   className="buffering-bar"
                   initial={{ width: "0%" }}
                   animate={phase === 'loading' ? { width: "100%" } : {}}
-                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
                 />
                 <motion.span
                   animate={{ opacity: [0.4, 1, 0.4] }}
@@ -3001,7 +3123,7 @@ const AboutSection = () => {
           <p style={{ minHeight: '100px' }}>
             {startTyping && (
               <Typewriter
-                text="I'm a Versatile DevSecOps Engineer with hands-on experience in secure full-stack development, cloud infrastructure (AWS, GCP), and CI/CD automation using Docker, Nginx, Cloudflare and Kubernetes. Proficient in Python, Node.js, and Next.js with strengths in automation testing (Selenium, Postman) and AI/ML workflows using PyTorch and TensorFlow. Seeking impactful roles in software development, cloud devops or aiml engineer."
+                text="I'm Hrishi, and I believe technology should empower, not complicate. As a Dev, I specialize in creating secure, automated infrastructure that lets developers focus on what they do best—building great products. From AWS cloud architectures to AI-powered automation, I combine full-stack development skills with DevOps best practices to deliver solutions that scale. My goal? Make every deployment feel like magic and every system bulletproof."
                 delay={20}
               />
             )}
@@ -3054,6 +3176,35 @@ const AboutSection = () => {
           <SpaceGame />
         </div>
       </div>
+
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        onClick={() => document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' })}
+        style={{
+          position: 'absolute',
+          bottom: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 'pointer',
+          zIndex: 10
+        }}
+      >
+        <motion.div
+          className="traffic-arrow"
+          animate={{
+            opacity: [0.3, 1, 0.3],
+            scale: [0.9, 1.1, 0.9]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <ChevronDown size={32} />
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
@@ -3099,28 +3250,47 @@ const App = () => {
         {loading && (
           <motion.div
             key="loader"
-            exit={{ opacity: 0, scale: 1.1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             className="loader"
           >
+            {/* Light burst overlay */}
             <motion.div
+              className="loader-burst"
+              initial={{ opacity: 0, scale: 0 }}
               animate={{
-                rotate: 360,
-                scale: [1, 1.3, 1]
+                opacity: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                scale: [0, 0, 0, 0, 0, 0, 0, 0, 3, 5]
               }}
               transition={{
-                rotate: { repeat: Infinity, duration: 2, ease: "linear" },
-                scale: { repeat: Infinity, duration: 1, ease: "easeInOut" }
+                duration: 2,
+                times: [0, 0.3, 0.6, 0.75, 0.8, 0.85, 0.88, 0.9, 0.95, 1],
+                ease: "easeOut"
+              }}
+            />
+
+            <motion.div
+              animate={{
+                // Progressive rotation: slow (90°) → medium (180°) → fast (360°) → explosion (540°)
+                rotate: [0, 90, 270, 540, 720],
+                scale: [1, 1, 1, 1.2, 1.5, 2, 2.5, 3, 3.5, 4]
+              }}
+              transition={{
+                rotate: {
+                  duration: 2,
+                  times: [0, 0.3, 0.6, 0.85, 1],
+                  ease: "linear"
+                },
+                scale: {
+                  duration: 2,
+                  times: [0, 0.3, 0.6, 0.75, 0.8, 0.85, 0.88, 0.9, 0.95, 1],
+                  ease: "easeOut"
+                }
               }}
               className="loader-icon"
             >
               <GiBlackHoleBolas size={40} />
             </motion.div>
-            <motion.span
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              Initializing Flux...
-            </motion.span>
           </motion.div>
         )}
       </AnimatePresence>
