@@ -300,9 +300,9 @@ export const DATA_CORES = [
         icon: Brain,
         color: "#a855f7",
         rgb: "168, 85, 247",
-        image: "C:/Users/mehta/.gemini/antigravity/brain/6d6dc22f-5119-4f2f-8239-9395ae57a1b9/aiml_resume_blueprint_1769179059693.png",
+        image: "https://res.cloudinary.com/dfzqhhywm/image/upload/v1746533363/Screenshot_2025-04-06_211536_dsu9f0.png",
         status: "NEURAL_LINK_READY",
-        embed: "https://drive.google.com/file/d/1VICb4yW26SG8QopToJE-7AV12A7UEzyU/preview"
+        pdfUrl: "/assets/Hrishi_Mehta_AI_ML_DS_Resume (1).pdf"
     },
     {
         id: "CORE_BETA",
@@ -311,18 +311,9 @@ export const DATA_CORES = [
         icon: Code2,
         color: "#22d3ee",
         rgb: "34, 211, 238",
-        image: "C:/Users/mehta/.gemini/antigravity/brain/6d6dc22f-5119-4f2f-8239-9395ae57a1b9/webdev_resume_blueprint_1769179078346.png",
-        status: "UPLINK_STABLE"
-    },
-    {
-        id: "CORE_GAMMA",
-        name: "DevSecOps",
-        key: "DEVOPS",
-        icon: Shield,
-        color: "#10b981",
-        rgb: "16, 185, 129",
-        image: "C:/Users/mehta/.gemini/antigravity/brain/6d6dc22f-5119-4f2f-8239-9395ae57a1b9/devops_resume_blueprint_1769179098208.png",
-        status: "PERIMETER_SECURE"
+        image: "https://res.cloudinary.com/dfzqhhywm/image/upload/v1746533364/ss_1_uniizu.png",
+        status: "UPLINK_STABLE",
+        pdfUrl: "/assets/Hrishi_Mehta_SD_SE_Resume.pdf"
     }
 ];
 

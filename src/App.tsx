@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Rocket, X, FolderArchive, ExternalLink, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
+import { ArrowRight, Rocket, X, FolderArchive, ExternalLink, ChevronDown, ChevronUp, ChevronRight, Download } from 'lucide-react';
 import { GoCopilot } from "react-icons/go";
 import { FaCss3Alt, FaAws } from "react-icons/fa";
 import { IoLogoJavascript, IoFlash } from "react-icons/io5";
@@ -171,57 +171,89 @@ const CosmicBackground = () => {
       </svg>
 
       {/* Smaller Planets */}
-      <div
-        className="planet"
-        style={{
-          width: '60px', height: '60px',
-          background: 'radial-gradient(circle at 30% 30%, #4f46e5, #000)',
-          top: '10%',
-          '--rev-duration': '120s',
-          '--rev-delay': '-5s',
-          '--glow-color': '#4f46e5'
-        } as any}
-      />
-      <div
-        className="planet"
-        style={{
-          width: '100px', height: '100px',
-          background: 'radial-gradient(circle at 30% 30%, #fcd34d, #92400e, #000)',
-          top: '65%',
-          '--rev-duration': '120s',
-          '--rev-delay': '-20s',
-          '--glow-color': '#fcd34d'
-        } as any}
-      >
-        <div className="planet-ring" style={{ width: '160%', height: '40%' }} />
-        <Satellite radius="110px" speed="120s" />
-      </div>
-      <div
-        className="planet"
-        style={{
-          width: '40px', height: '40px',
-          background: 'radial-gradient(circle at 30% 30%, #22d3ee, #000)',
-          top: '35%',
-          '--rev-duration': '100s',
-          '--rev-delay': '-35s',
-          '--glow-color': '#22d3ee'
-        } as any}
-      />
+      {!isMobile && (
+        <>
+          <div
+            className="planet"
+            style={{
+              width: '60px', height: '60px',
+              background: 'radial-gradient(circle at 30% 30%, #4f46e5, #000)',
+              top: '10%',
+              '--rev-duration': '120s',
+              '--rev-delay': '-5s',
+              '--glow-color': '#4f46e5'
+            } as any}
+          />
+          <div
+            className="planet"
+            style={{
+              width: '100px', height: '100px',
+              background: 'radial-gradient(circle at 30% 30%, #fcd34d, #92400e, #000)',
+              top: '65%',
+              '--rev-duration': '120s',
+              '--rev-delay': '-20s',
+              '--glow-color': '#fcd34d'
+            } as any}
+          >
+            <div className="planet-ring" style={{ width: '160%', height: '40%' }} />
+            <Satellite radius="110px" speed="120s" />
+          </div>
+          <div
+            className="planet"
+            style={{
+              width: '40px', height: '40px',
+              background: 'radial-gradient(circle at 30% 30%, #22d3ee, #000)',
+              top: '35%',
+              '--rev-duration': '100s',
+              '--rev-delay': '-35s',
+              '--glow-color': '#22d3ee'
+            } as any}
+          />
 
-      {/* Mini Mars */}
-      <div
-        className="planet"
-        style={{
-          width: '25px', height: '25px',
-          background: 'radial-gradient(circle at 30% 30%, #ef4444, #7f1d1d)',
-          top: '50%',
-          '--rev-duration': '100s',
-          '--rev-delay': '-15s',
-          '--glow-color': '#ef4444'
-        } as any}
-      >
-        <Satellite radius="45px" speed="8s" delay="-2s" />
-      </div>
+          {/* Mini Mars */}
+          <div
+            className="planet"
+            style={{
+              width: '25px', height: '25px',
+              background: 'radial-gradient(circle at 30% 30%, #ef4444, #7f1d1d)',
+              top: '50%',
+              '--rev-duration': '100s',
+              '--rev-delay': '-15s',
+              '--glow-color': '#ef4444'
+            } as any}
+          >
+            <Satellite radius="45px" speed="8s" delay="-2s" />
+          </div>
+
+          {/* Mini Neptune */}
+          <div
+            className="planet"
+            style={{
+              width: '35px', height: '35px',
+              background: 'radial-gradient(circle at 30% 30%, #3b82f6, #1e3a8a, #000)',
+              top: '80%',
+              '--rev-duration': '180s',
+              '--rev-delay': '-60s',
+              '--glow-color': '#3b82f6'
+            } as any}
+          />
+
+          {/* Mini Earth */}
+          <div
+            className="planet"
+            style={{
+              width: '40px', height: '40px',
+              background: 'radial-gradient(circle at 30% 30%, #4ade80, #3b82f6, #1e3a8a)',
+              top: '45%',
+              '--rev-duration': '130s',
+              '--rev-delay': '-10s',
+              '--glow-color': '#5d96a9ff'
+            } as any}
+          >
+            <div className="moon" />
+          </div>
+        </>
+      )}
 
       {/* Mini Jupiter */}
       <div
@@ -237,34 +269,6 @@ const CosmicBackground = () => {
       />
 
       <Satellite radius="200px" speed="180s" delay="-50s" />
-
-      {/* Mini Neptune */}
-      <div
-        className="planet"
-        style={{
-          width: '35px', height: '35px',
-          background: 'radial-gradient(circle at 30% 30%, #3b82f6, #1e3a8a, #000)',
-          top: '80%',
-          '--rev-duration': '180s',
-          '--rev-delay': '-60s',
-          '--glow-color': '#3b82f6'
-        } as any}
-      />
-
-      {/* Mini Earth */}
-      <div
-        className="planet"
-        style={{
-          width: '40px', height: '40px',
-          background: 'radial-gradient(circle at 30% 30%, #4ade80, #3b82f6, #1e3a8a)',
-          top: '45%',
-          '--rev-duration': '130s',
-          '--rev-delay': '-10s',
-          '--glow-color': '#5d96a9ff'
-        } as any}
-      >
-        <div className="moon" />
-      </div>
 
       {/* Saturn-like Planet */}
       <div
@@ -718,7 +722,10 @@ const CustomCursor = () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
       timeoutRef.current = window.setTimeout(() => setIsMoving(false), 1000);
 
-      setTrailPos({ x: e.clientX, y: e.clientY });
+      // UFO follows behind spaceship with more distance
+      setTimeout(() => {
+        setTrailPos({ x: e.clientX, y: e.clientY });
+      }, 150);
     };
 
     const handleHover = (e: MouseEvent) => {
@@ -748,7 +755,7 @@ const CustomCursor = () => {
           scale: (isTerminal || isInGame) ? 0 : (isHovering ? 1.4 : 1),
           opacity: (isTerminal || isInGame) ? 0 : 1,
         }}
-        transition={{ type: 'spring', damping: 30, stiffness: 200, mass: 0.5 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 150, mass: 0.6 }}
         style={{ pointerEvents: 'none' }}
       >
         <Rocket size={24} fill="currentColor" />
@@ -758,11 +765,11 @@ const CustomCursor = () => {
         className="cursor-alien-trail"
         animate={{
           x: isMoving ? trailPos.x - 10 : window.innerWidth - 60,
-          y: isMoving ? trailPos.y + 20 : window.innerHeight - 60,
+          y: isMoving ? trailPos.y + 40 : window.innerHeight - 60,
           scale: (isTerminal || isInGame) ? 0 : (isMoving ? (isHovering ? 1.2 : 0.9) : 0),
           opacity: (isMoving && !isTerminal && !isInGame) ? 0.8 : 0,
         }}
-        transition={{ type: 'spring', damping: 15, stiffness: 80, mass: 0.5 }}
+        transition={{ type: 'spring', damping: 12, stiffness: 60, mass: 0.8 }}
         style={{ pointerEvents: 'none' }}
       >
         <UfoIcon size={20} />
@@ -1031,8 +1038,8 @@ const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
             Hey, I am <ParticleText text="Hrishi" />
           </h1>
           <p className="hero-description">
-            A versatile DevOps Engineer specializing in secure full-stack development,
-            cloud infrastructure, and AI/ML workflows.
+            Architecting scalable applications and secure infrastructure
+with a focus on minimalism and performance.
           </p>
           <div className="hero-actions">
             <button className="btn-primary" onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}>
@@ -1053,29 +1060,6 @@ const Hero = ({ onOpenDock }: { onOpenDock: () => void }) => {
           <img src="/assets/personal_image.png" alt="Hrishi" className="hero-personal-img" />
         </div>
       </div>
-
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="hero-scroll"
-        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-        style={{ cursor: 'pointer' }}
-      >
-        <motion.div
-          className="traffic-arrow"
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [0.9, 1.1, 0.9]
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <ChevronDown size={32} />
-        </motion.div>
-      </motion.div>
     </section>
   );
 };
@@ -1944,12 +1928,22 @@ export const TacticalDataDock = ({ isOpen, setIsOpen }: { isOpen: boolean; setIs
               style={{ '--core-color': currentCore.color, '--core-rgb': currentCore.rgb } as any}
             >
               <div className="holographic-dossier internal">
-                {currentCore.embed ? (
-                  <iframe
-                    src={currentCore.embed}
-                    className="dossier-frame"
-                    title="Resume Preview"
-                  />
+                {currentCore.pdfUrl ? (
+                  <div className="pdf-preview-container">
+                    <iframe
+                      src={currentCore.pdfUrl}
+                      className="dossier-frame"
+                      title="Resume Preview"
+                    />
+                    <a 
+                      href={currentCore.pdfUrl} 
+                      download={`${currentCore.name.replace(/\s+/g, '_')}_Resume.pdf`}
+                      className="pdf-download-btn"
+                    >
+                      <Download size={18} />
+                      Download Resume
+                    </a>
+                  </div>
                 ) : (
                   <img src={currentCore.image} alt="Resume Preview" className="dossier-image" />
                 )}
@@ -2852,10 +2846,8 @@ const AstronautAIBubble = ({ isDesktop }: { isDesktop?: boolean }) => {
   useEffect(() => {
     const startSequence = () => setStep(1);
     const startTimer = setTimeout(startSequence, 3000);
-    const interval = setInterval(startSequence, 180000);
     return () => {
       clearTimeout(startTimer);
-      clearInterval(interval);
     };
   }, []);
 
@@ -2875,7 +2867,10 @@ const AstronautAIBubble = ({ isDesktop }: { isDesktop?: boolean }) => {
     setIsTalking(false);
     setTimeout(() => {
       setStep(prev => {
-        if (prev === 3) return 0;
+        if (prev === 3) {
+          setTimeout(() => setStep(1), 2000);
+          return 0;
+        }
         return prev + 1;
       });
     }, 1500);
@@ -2945,7 +2940,9 @@ const AstronautAIBubble = ({ isDesktop }: { isDesktop?: boolean }) => {
           transform: isDesktop ? 'translateY(45px)' : 'translateY(-5px)'
         } as any}
       >
-        {currentFrames.join('\n')}
+        {currentFrames.map((line, i) => (
+          <div key={i}>{line}</div>
+        ))}
       </div>
     </div>
   );
@@ -3123,7 +3120,7 @@ const AboutSection = () => {
           <p style={{ minHeight: '100px' }}>
             {startTyping && (
               <Typewriter
-                text="I'm Hrishi, and I believe technology should empower, not complicate. As a Dev, I specialize in creating secure, automated infrastructure that lets developers focus on what they do best—building great products. From AWS cloud architectures to AI-powered automation, I combine full-stack development skills with DevOps best practices to deliver solutions that scale. My goal? Make every deployment feel like magic and every system bulletproof."
+                text="As a highly adaptable and results-driven professional, I bring a robust blend of expertise in Full-stack Development, Cloud DevOps Engineering, Software Testing, Cyber Security Enthusiast and AI/ML Engineering. My core focus is on architecting, building, and securing high-quality, scalable applications and secure infrastructure that drive innovation and deliver tangible business value."
                 delay={20}
               />
             )}
@@ -3190,20 +3187,6 @@ const AboutSection = () => {
           zIndex: 10
         }}
       >
-        <motion.div
-          className="traffic-arrow"
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [0.9, 1.1, 0.9]
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <ChevronDown size={32} />
-        </motion.div>
       </motion.div>
     </section>
   );

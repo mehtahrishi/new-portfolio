@@ -1676,6 +1676,12 @@ section {
   z-index: 10;
 }
 
+@media (max-width: 768px) {
+  .astronaut-bubble {
+    bottom: 120%;
+  }
+}
+
 .astronaut-bubble::after {
   content: '';
   position: absolute;
@@ -3479,6 +3485,12 @@ section {
   letter-spacing: 1px;
 }
 
+@media (max-width: 768px) {
+  .stat-label {
+    display: none;
+  }
+}
+
 .stat-value {
   font-family: var(--font-mono);
   font-size: 1.1rem;
@@ -3726,6 +3738,40 @@ section {
   border: none;
   background: white;
   border-radius: 4px;
+}
+
+.pdf-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.pdf-download-btn {
+  background: rgba(var(--core-rgb), 0.1);
+  border: 1px solid rgba(var(--core-rgb), 0.3);
+  color: var(--core-color);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pdf-download-btn:hover {
+  background: rgba(var(--core-rgb), 0.2);
+  box-shadow: 0 0 20px rgba(var(--core-rgb), 0.4);
+  border-color: var(--core-color);
+  transform: translateY(-2px);
 }
 
 .dossier-controls {
