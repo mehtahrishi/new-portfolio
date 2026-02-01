@@ -11,35 +11,76 @@ import {
 export const SKILLS_CATEGORIES = [
     {
         title: "Dev Operations",
-        items: ["Git", "GitHub", "Docker", "Kubernetes", "AWS", "CI/CD", "Nginx", "GCP", "Linux"],
+        items: [
+            { name: "Git", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/git/git-original.svg" },
+            { name: "GitHub", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/github/github-original.svg" },
+            { name: "Docker", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/docker/docker-original.svg" },
+            { name: "Kubernetes", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/kubernetes/kubernetes-original.svg" },
+            { name: "AWS", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" },
+            { name: "CI/CD", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/githubactions/githubactions-original.svg" },
+            { name: "Nginx", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/nginx/nginx-original.svg" },
+            { name: "GCP", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/googlecloud/googlecloud-original.svg" },
+            { name: "Linux", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/linux/linux-original.svg" }
+        ],
         icon: Server,
         color: "#6366f1",
         direction: 'left' as const
     },
     {
         title: "Frontend",
-        items: ["React JS", "Redux", "NextJS", "HTML", "CSS", "JavaScript", "TypeScript", "Bootstrap", "Tailwind CSS"],
+        items: [
+            { name: "React JS", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/react/react-original.svg" },
+            { name: "Redux", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redux/redux-original.svg" },
+            { name: "NextJS", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/nextjs/nextjs-original.svg" },
+            { name: "HTML", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" },
+            { name: "CSS", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/css3/css3-original.svg" },
+            { name: "JavaScript", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" },
+            { name: "TypeScript", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/typescript/typescript-original.svg" },
+            { name: "Bootstrap", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/bootstrap/bootstrap-original.svg" },
+            { name: "Tailwind CSS", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/tailwindcss/tailwindcss-original.svg" }
+        ],
         icon: Code2,
         color: "#22d3ee",
         direction: 'right' as const
     },
     {
         title: "AI/ML",
-        items: ["PyTorch", "TensorFlow", "Scikit-learn", "Pandas", "NumPy", "Matplotlib"],
+        items: [
+            { name: "PyTorch", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pytorch/pytorch-original.svg" },
+            { name: "TensorFlow", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tensorflow/tensorflow-original.svg" },
+            { name: "Scikit-learn", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/scikitlearn/scikitlearn-original.svg" },
+            { name: "Pandas", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pandas/pandas-original.svg" },
+            { name: "NumPy", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/numpy/numpy-original.svg" },
+            { name: "Matplotlib", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matplotlib/matplotlib-original.svg" }
+        ],
         icon: Brain,
         color: "#10b981",
         direction: 'left' as const
     },
     {
         title: "Databases",
-        items: ["Neo4j", "MongoDB", "PostgreSQL", "MySQL", "Appwrite", "Drizzle ORM"],
+        items: [
+            { name: "Neo4j", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg" },
+            { name: "MongoDB", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/mongodb/mongodb-original.svg" },
+            { name: "PostgreSQL", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" },
+            { name: "MySQL", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" },
+            { name: "Appwrite", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/appwrite/appwrite-original.svg" },
+            { name: "Drizzle ORM", image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAByElEQVR4AeyUzStEYRTGX0IUSkSkFGFlJRIpWdgRJZKVshBRSpTymRIlH1kqko2/QHYkUcRCykL5SCg2QpLE75nu1fUx18wkC2Z6fuecO+d957n33LcJNb/8CRr++MCDI/2/I63g0ZchGb5TGgsWoRZMIIcmlY36gTJyOnynORbUQBEEZDjKxkjYhHVwUyXNEniCMfDbsIBNdSA1K7gQTm8CJOUTFW4jTWJBPDg1aV3Mk3fBVhhFNjjVxoXe3zV5EDzyZphD9wiWwFY9RT48QBfYCqHQaPfJWSAlEPpA6ibcgUfeDDWCKFY8gxRBGAFpmHAJthopdCMy1rvi0sgshmIPZuBNXxmW0y0FqUMBUixOyTo0JI+iiUMgTRM0FZLJUwCN9YX8po+GetHjVneBrFGRzLExJheK4RFs9VAkwhX0gq1qCpmukN/po2Er3Qy4hU5wSodET2h/pwPRbl3ond5YtdIZYRs+yWkYR1ezJ5kBwgW4SZPQRLZYNAs+yWnYwo5YOIApcFMmzSqQmhR8xWm4xqZDaAD7tFF+qXO+3QBNYofss5yGq+zSnesvi9JV93QLoR/8ktPQr42BLg4aBjo5r/v+/khfAQAA//+p3xSIAAAABklEQVQDAPNRRDmE35SpAAAAAElFTkSuQmCC" }
+        ],
         icon: Database,
         color: "#ec4899",
         direction: 'right' as const
     },
     {
         title: "Backend",
-        items: ["Python", "Flask", "Node JS", "Express JS", "Puppeteer", "Postman"],
+        items: [
+            { name: "Python", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/python/python-original.svg" },
+            { name: "Flask", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/flask/flask-original.svg" },
+            { name: "Node JS", image: "https://cdn.jsdelivr.net/npm/devicon@2.16.0/icons/nodejs/nodejs-original.svg" },
+            { name: "Express JS", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" },
+            { name: "Puppeteer", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/puppeteer/puppeteer-original.svg" },
+            { name: "Postman", image: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postman/postman-original.svg" }
+        ],
         icon: Server,
         color: "#f59e0b",
         direction: 'left' as const

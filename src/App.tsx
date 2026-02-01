@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Rocket, X, FolderArchive, ExternalLink, ChevronDown, ChevronUp, ChevronRight, Download } from 'lucide-react';
-import { GoCopilot } from "react-icons/go";
-import { FaCss3Alt, FaAws } from "react-icons/fa";
-import { IoLogoJavascript, IoFlash } from "react-icons/io5";
-import { RiGeminiFill } from "react-icons/ri";
-import { SiFirebase, SiGnubash, SiGithubactions, SiDrizzle, SiClaude, SiPostgresql, SiPostman, SiPuppeteer, SiApollographql } from "react-icons/si";
-import { TbBrandMysql } from "react-icons/tb";
-import { AiOutlineOpenAI } from "react-icons/ai";
 import { GiBlackHoleBolas } from "react-icons/gi";
+import { SiApollographql } from "react-icons/si";
 import './App.css';
 import {
   SKILLS_CATEGORIES,
@@ -1064,61 +1058,7 @@ with a focus on minimalism and performance.
   );
 };
 
-const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0, onLoad }: { name: string; icon: any; color: string; size?: number, delay?: number, onLoad?: () => void }) => {
-  const [imgError, setImgError] = useState(false);
-
-  // Mapping names to Simple Icons slugs
-  const iconMap: Record<string, string> = {
-    "Git": "git", "Docker": "docker", "Kubernetes": "kubernetes", "AWS": "amazonwebservices",
-    "Nginx": "nginx", "GCP": "googlecloud", "Apache": "apache", "Linux": "linux",
-    "Prometheus": "prometheus", "Redis": "redis", "Python": "python", "NodeJS": "nodedotjs",
-    "ExpressJS": "express", "Flask": "flask", "Selenium": "selenium", "Postman": "postman",
-    "Neo4j": "neo4j", "MongoDB": "mongodb", "Appwrite": "appwrite", "ReactJS": "react",
-    "NextJS": "nextdotjs", "HTML": "html5", "CSS": "css3", "JavaScript": "javascript",
-    "TypeScript": "typescript", "Tailwind CSS": "tailwindcss", "Framer Motion": "framer",
-    "GitHub": "github", "Jenkins": "jenkins", "Ansible": "ansible",
-    "n8n": "n8n", "Make": "make", "Zapier": "zapier", "Claude": "anthropic"
-  };
-
-  const slug = iconMap[name] || name.toLowerCase().replace(/\s+/g, '');
-  const iconUrl = `https://cdn.simpleicons.org/${slug}/${color.replace('#', '')}`;
-
-  const renderIcon = () => {
-    if (name === "Copilot") return <GoCopilot className="skill-brand-icon" size={size} />;
-    if (name === "CSS") return <FaCss3Alt className="skill-brand-icon" size={size} />;
-    if (name === "JavaScript" || name === "JS") return <IoLogoJavascript className="skill-brand-icon" size={size} />;
-    if (name === "Gemini") return <RiGeminiFill className="skill-brand-icon" size={size} />;
-    if (name === "Firebase Studio") return <SiFirebase className="skill-brand-icon" size={size} />;
-    if (name === "Bash") return <SiGnubash className="skill-brand-icon" size={size} />;
-    if (name === "SQL") return <TbBrandMysql className="skill-brand-icon" size={size} />;
-    if (name === "CI/CD") return <SiGithubactions className="skill-brand-icon" size={size} />;
-    if (name === "AWS") return <FaAws className="skill-brand-icon" size={size} />;
-    if (name === "Drizzle ORM" || name === "Drizzle") return <SiDrizzle className="skill-brand-icon" size={size} />;
-    if (name === "OpenAI") return <AiOutlineOpenAI className="skill-brand-icon" size={size} />;
-    if (name === "Claude") return <SiClaude className="skill-brand-icon" size={size} />;
-    if (name === "PostgreSQL" || name === "Postgres") return <SiPostgresql className="skill-brand-icon" size={size} />;
-    if (name === "Postman") return <SiPostman className="skill-brand-icon" size={size} />;
-    if (name === "Puppeteer") return <SiPuppeteer className="skill-brand-icon" size={size} />;
-    if (name === "Groq") return <IoFlash className="skill-brand-icon" size={size} />;
-
-    if (!imgError) {
-      return (
-        <img
-          src={iconUrl}
-          alt={name}
-          className="skill-brand-icon"
-          style={{ width: `${size}px`, height: `${size}px`, objectFit: 'contain' }}
-          onError={() => {
-            setImgError(true);
-            onLoad?.();
-          }}
-          onLoad={() => onLoad?.()}
-        />
-      );
-    }
-    return <FallbackIcon className="skill-brand-icon" size={size} />;
-  };
-
+const SkillIcon = ({ imageUrl, name, color, size = 40, delay = 0 }: { imageUrl: string; name: string; color: string; size?: number, delay?: number }) => {
   return (
     <div
       className="skill-icon-outer"
@@ -1149,21 +1089,19 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0, onLo
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}
         >
-          {(() => {
-            const element = renderIcon();
-            // If it's a component (Lucide/React Icon), it's effectively "loaded" immediately
-            if (React.isValidElement(element) && element.type !== 'img') {
-              setTimeout(() => onLoad?.(), 0);
-            }
-            return element;
-          })()}
+          <img
+            src={imageUrl}
+            alt={name}
+            className="skill-brand-icon"
+            style={{ width: `${size}px`, height: `${size}px`, objectFit: 'contain' }}
+          />
         </motion.div>
       </motion.div>
     </div>
   );
 };
 
-const MobileSkillTag = ({ name, icon: FallbackIcon, color, delay }: { name: string; icon: any; color: string; delay: number }) => {
+const MobileSkillTag = ({ imageUrl, name, color, delay }: { imageUrl: string; name: string; color: string; delay: number }) => {
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
@@ -1191,7 +1129,7 @@ const MobileSkillTag = ({ name, icon: FallbackIcon, color, delay }: { name: stri
       viewport={{ once: true }}
       onViewportEnter={handleViewportEnter}
     >
-      <SkillIcon name={name} icon={FallbackIcon} color={color} size={28} delay={0} />
+      <SkillIcon imageUrl={imageUrl} name={name} color={color} size={28} delay={0} />
       <span className="mobile-skill-name">{displayText}</span>
     </motion.div>
   );
@@ -1305,9 +1243,9 @@ const SkillsSection = () => {
                       <div className="mobile-skill-tags">
                         {cat.items.map((item, i) => (
                           <MobileSkillTag
-                            key={item}
-                            name={item}
-                            icon={cat.icon}
+                            key={item.name}
+                            imageUrl={item.image}
+                            name={item.name}
                             color={cat.color}
                             delay={idx * 0.1 + i * 0.05}
                           />
@@ -1346,7 +1284,7 @@ const SkillsSection = () => {
                             {cat.items.map((item, idx) => {
                               const connections: number[] = [];
                               // Generate unique connections based on skill name hash
-                              const hash = item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                              const hash = item.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                               const connectionCount = 2 + (hash % 3); // 2-4 connections
                               
                               // Create varied connections based on hash
@@ -1394,7 +1332,7 @@ const SkillsSection = () => {
                             
                             return (
                               <motion.div
-                                key={item}
+                                key={item.name}
                                 className="desktop-skill-item"
                                 data-skill-idx={idx}
                                 initial={{ opacity: 0, scale: 0 }}
@@ -1433,13 +1371,13 @@ const SkillsSection = () => {
                                 }}
                               >
                                 <SkillIcon
-                                  name={item}
-                                  icon={cat.icon}
+                                  imageUrl={item.image}
+                                  name={item.name}
                                   color={cat.color}
                                   size={32}
                                   delay={0}
                                 />
-                                <span className="desktop-skill-name">{item}</span>
+                                <span className="desktop-skill-name">{item.name}</span>
                               </motion.div>
                             );
                           })}
