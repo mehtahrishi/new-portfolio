@@ -2484,6 +2484,8 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   const [activeTab, setActiveTab] = useState<'bash' | 'nav'>('bash');
   const [navSelectedIndex, setNavSelectedIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -2551,13 +2553,6 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
-          return;
-        }
-      }
-
       if (e.ctrlKey && e.key === 'c') {
         e.preventDefault();
         if (countdown !== null) {
@@ -2570,6 +2565,28 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
         setInputValue("");
         setShowMenu(false);
         return;
+      }
+
+      // Handle command history with arrow keys (works even when input is focused)
+      if (activeTab === 'bash' && !showMenu && commandHistory.length > 0) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
+          setHistoryIndex(newIndex);
+          setInputValue(commandHistory[commandHistory.length - 1 - newIndex]);
+          return;
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (historyIndex > 0) {
+            const newIndex = historyIndex - 1;
+            setHistoryIndex(newIndex);
+            setInputValue(commandHistory[commandHistory.length - 1 - newIndex]);
+          } else {
+            setHistoryIndex(-1);
+            setInputValue('');
+          }
+          return;
+        }
       }
 
       // Handle Quick Nav Tab Navigation
@@ -2589,27 +2606,29 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
         return;
       }
 
-      if (!showMenu) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % contactOptions.length);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + contactOptions.length) % contactOptions.length);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        const selected = contactOptions[selectedIndex];
-        setMessages(prev => [
-          ...prev,
-          { type: 'user', content: `select ${selected.label}` }
-        ]);
-        setRedirectInfo({ label: selected.label, url: selected.url });
-        setCountdown(3);
+      // Handle contact menu navigation
+      if (showMenu) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev + 1) % contactOptions.length);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev - 1 + contactOptions.length) % contactOptions.length);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const selected = contactOptions[selectedIndex];
+          setMessages(prev => [
+            ...prev,
+            { type: 'user', content: `select ${selected.label}` }
+          ]);
+          setRedirectInfo({ label: selected.label, url: selected.url });
+          setCountdown(3);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showMenu, selectedIndex, activeTab, navSelectedIndex, navOptions, contactOptions, countdown]);
+  }, [isOpen, showMenu, selectedIndex, activeTab, navSelectedIndex, navOptions, contactOptions, countdown, commandHistory, historyIndex]);
 
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -2619,6 +2638,11 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
     e.preventDefault();
     if (!inputValue.trim()) return;
     const userMessage = inputValue.trim().toLowerCase();
+    
+    // Add to command history
+    setCommandHistory(prev => [...prev, inputValue.trim()]);
+    setHistoryIndex(-1);
+    
     setMessages(prev => [...prev, { type: 'user', content: inputValue }]);
     setInputValue("");
 
@@ -2723,9 +2747,8 @@ const GlobalTerminal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (va
                     <>
                       1. Architect of <span className="highlight">KnowMe CLI</span> - A Bash-native tool for hardware intelligence.
                       <br />2. Recognized <span className="highlight">Google Gen AI Top Performer</span>.
-                      <br />3. Winner of the <span className="highlight">AWS Amazon Q CLI Challenge</span>.
-                      <br />4. Certified Professional: <span className="highlight">ISO / AI / Neo4j Graph DB</span>.
-                      <br />5. Expert in Large Language Models, Full Stack, and Multi-Modal SDKs (Gemini, Claude).
+                      <br />3. Certified Professional: <span className="highlight">ISO / AI / Neo4j Graph DB</span>.
+                      <br />4. Expert in Large Language Models, Full Stack, and Multi-Modal SDKs (Gemini, Claude).
                     </>
                   )}
                 </div>
