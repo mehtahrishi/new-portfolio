@@ -1163,53 +1163,6 @@ const SkillIcon = ({ name, icon: FallbackIcon, color, size = 40, delay = 0, onLo
   );
 };
 
-const InfiniteSkillLoop = ({ items, direction = 'left', color, icon, orientation = 'horizontal' }: { items: string[], direction?: 'left' | 'right' | 'up' | 'down', color: string, icon: any, orientation?: 'horizontal' | 'vertical' }) => {
-  const [loadedCount, setLoadedCount] = useState(0);
-  const doubledItems = [...items, ...items, ...items];
-  const isVertical = orientation === 'vertical';
-  const isAllLoaded = loadedCount >= items.length;
-
-  return (
-    <div className={`infinite-loop-container ${orientation} ${direction} ${isAllLoaded ? 'ready' : 'loading'}`}>
-      <motion.div
-        className={`infinite-loop-track ${orientation}`}
-        animate={isAllLoaded ? (isVertical ? {
-          y: direction === 'down' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
-        } : {
-          x: direction === 'left' ? ['0%', '-33.33%'] : ['-33.33%', '0%']
-        }) : {}}
-        transition={{
-          duration: isVertical ? 15 : 25,
-          ease: "linear",
-          repeat: Infinity
-        }}
-        style={{ opacity: isAllLoaded ? 1 : 0 }}
-      >
-        {doubledItems.map((item, idx) => (
-          <div key={`${item}-${idx}`} className="loop-item">
-            <SkillIcon
-              name={item}
-              icon={icon}
-              color={color}
-              size={32}
-              onLoad={() => idx < items.length && setLoadedCount(prev => prev + 1)}
-            />
-          </div>
-        ))}
-      </motion.div>
-      {!isAllLoaded && (
-        <div className="loop-placeholder">
-          <motion.div
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-            className="placeholder-glow"
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
 const MobileSkillTag = ({ name, icon: FallbackIcon, color, delay }: { name: string; icon: any; color: string; delay: number }) => {
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -1268,19 +1221,24 @@ const SkillsSection = () => {
   const pages = [
     {
       id: 0,
-      categories: [categories[0], categories[3]],
-      grid: "1.4fr 0.6fr"
+      categories: [categories[0], categories[1]],
+      grid: "1fr 1fr"
     },
     {
       id: 1,
-      categories: [categories[2], categories[1]],
-      grid: "0.6fr 1.4fr"
+      categories: [categories[2], categories[3]],
+      grid: "1fr 1fr"
+    },
+    {
+      id: 2,
+      categories: [categories[4]],
+      grid: "1fr"
     }
   ];
 
   const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.x > 100 && currentPage > 0) setCurrentPage(0);
-    else if (info.offset.x < -100 && currentPage < 1) setCurrentPage(1);
+    if (info.offset.x > 100 && currentPage > 0) setCurrentPage(currentPage - 1);
+    else if (info.offset.x < -100 && currentPage < pages.length - 1) setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -1377,101 +1335,115 @@ const SkillsSection = () => {
                     }}
                   >
                     {pages[currentPage].categories.map((cat, i) => (
-                      <div key={i} className={`skill-category-box glass-card ${cat.title === 'Dev Operations' || cat.title === 'Full Stack Development' ? 'mirrored-card' : ''}`}>
+                      <div key={i} className="skill-category-box glass-card">
                         <div className="category-header" style={{ color: cat.color }}>
-                          <cat.icon size={20} />
+                          <cat.icon size={24} />
                           <span>{cat.title}</span>
                         </div>
-                        {(cat.title === 'Dev Operations' || cat.title === 'Full Stack Development') ? (
-                          <div className="asteroid-cluster mirrored-cluster">
-                            <div className="devops-special-grid">
-                              {(() => {
-                                const half = Math.ceil(cat.items.length / 2);
-                                const left = cat.items.slice(0, half);
-                                const right = cat.items.slice(half);
-                                const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
-
-                                return left.map((item: string, idx: number) => (
-                                  <div key={item} style={{ display: 'contents' }}>
-                                    <SkillIcon
-                                      name={item}
-                                      icon={cat.icon}
-                                      color={cat.color}
-                                      size={24}
-                                      delay={baseDelay + (idx * 0.1)}
-                                    />
-                                    <motion.span
-                                      className="skill-label"
-                                      initial={{ opacity: 0, x: -10 }}
-                                      whileInView={{
-                                        opacity: 1,
-                                        x: 0,
-                                        transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
-                                      }}
-                                      viewport={{ once: true }}
-                                    >
-                                      {item}
-                                    </motion.span>
-                                    {right[idx] ? (
-                                      <>
-                                        <motion.span
-                                          className="skill-label text-right"
-                                          initial={{ opacity: 0, x: 10 }}
-                                          whileInView={{
-                                            opacity: 1,
-                                            x: 0,
-                                            transition: { delay: baseDelay + ((cat.items.length - 1 - idx) * 0.1) + 0.1 }
-                                          }}
-                                          viewport={{ once: true }}
-                                        >
-                                          {right[idx]}
-                                        </motion.span>
-                                        <SkillIcon
-                                          name={right[idx]}
-                                          icon={cat.icon}
-                                          color={cat.color}
-                                          size={24}
-                                          delay={baseDelay + ((cat.items.length - 1 - idx) * 0.1)}
-                                        />
-                                      </>
-                                    ) : (
-                                      <><div /><div /></>
-                                    )}
-                                  </div>
-                                ));
-                              })()}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="asteroid-cluster list-cluster">
+                        <div className="desktop-skill-grid">
+                          {/* Neural Network SVG Connections */}
+                          <svg className="neural-network-svg" xmlns="http://www.w3.org/2000/svg">
                             {cat.items.map((item, idx) => {
-                              const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.1 : 0;
-                              return (
-                                <div key={item} className="skill-list-item">
-                                  <SkillIcon
-                                    name={item}
-                                    icon={cat.icon}
-                                    color={cat.color}
-                                    size={28}
-                                    delay={baseDelay + (idx * 0.1)}
+                              const connections: number[] = [];
+                              // Generate unique connections based on skill name hash
+                              const hash = item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                              const connectionCount = 2 + (hash % 3); // 2-4 connections
+                              
+                              // Create varied connections based on hash
+                              const possibleTargets = cat.items
+                                .map((_, i) => i)
+                                .filter(i => i !== idx && Math.abs(i - idx) <= 4);
+                              
+                              for (let i = 0; i < Math.min(connectionCount, possibleTargets.length); i++) {
+                                const targetIdx = possibleTargets[(hash * (i + 1)) % possibleTargets.length];
+                                if (!connections.includes(targetIdx) && targetIdx < idx) {
+                                  connections.push(targetIdx);
+                                }
+                              }
+                              
+                              return connections.map(targetIdx => {
+                                const col1 = idx % 3;
+                                const row1 = Math.floor(idx / 3);
+                                const col2 = targetIdx % 3;
+                                const row2 = Math.floor(targetIdx / 3);
+                                
+                                // Calculate positions (approximate grid positions)
+                                const x1 = (col1 + 0.5) * 33.33;
+                                const y1 = (row1 + 0.5) * (100 / Math.ceil(cat.items.length / 3));
+                                const x2 = (col2 + 0.5) * 33.33;
+                                const y2 = (row2 + 0.5) * (100 / Math.ceil(cat.items.length / 3));
+                                
+                                return (
+                                  <line
+                                    key={`${idx}-${targetIdx}`}
+                                    className="connection-line"
+                                    data-source={idx}
+                                    data-target={targetIdx}
+                                    x1={`${x1}%`}
+                                    y1={`${y1}%`}
+                                    x2={`${x2}%`}
+                                    y2={`${y2}%`}
                                   />
-                                  <motion.span
-                                    className="skill-label"
-                                    initial={{ opacity: 0, x: 10 }}
-                                    whileInView={{
-                                      opacity: 1,
-                                      x: 0,
-                                      transition: { delay: baseDelay + (idx * 0.1) + 0.1 }
-                                    }}
-                                    viewport={{ once: true }}
-                                  >
-                                    {item}
-                                  </motion.span>
-                                </div>
-                              );
+                                );
+                              });
                             })}
-                          </div>
-                        )}
+                          </svg>
+                          
+                          {cat.items.map((item, idx) => {
+                            const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.08 : 0;
+                            
+                            return (
+                              <motion.div
+                                key={item}
+                                className="desktop-skill-item"
+                                data-skill-idx={idx}
+                                initial={{ opacity: 0, scale: 0 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: baseDelay + (idx * 0.08), type: "spring" }}
+                                viewport={{ once: true }}
+                                onMouseEnter={(e) => {
+                                  const skillItem = e.currentTarget;
+                                  const grid = skillItem.closest('.desktop-skill-grid');
+                                  if (!grid) return;
+                                  
+                                  // Highlight connected lines
+                                  const lines = grid.querySelectorAll('.connection-line');
+                                  lines.forEach((line: any) => {
+                                    if (line.dataset.source == idx || line.dataset.target == idx) {
+                                      line.classList.add('active');
+                                      
+                                      // Highlight connected skills
+                                      const connectedIdx = line.dataset.source == idx ? line.dataset.target : line.dataset.source;
+                                      const connectedSkill = grid.querySelector(`[data-skill-idx="${connectedIdx}"]`);
+                                      connectedSkill?.classList.add('highlighted');
+                                    }
+                                  });
+                                }}
+                                onMouseLeave={(e) => {
+                                  const skillItem = e.currentTarget;
+                                  const grid = skillItem.closest('.desktop-skill-grid');
+                                  if (!grid) return;
+                                  
+                                  // Remove highlights
+                                  const lines = grid.querySelectorAll('.connection-line.active');
+                                  lines.forEach(line => line.classList.remove('active'));
+                                  
+                                  const highlighted = grid.querySelectorAll('.desktop-skill-item.highlighted');
+                                  highlighted.forEach(skill => skill.classList.remove('highlighted'));
+                                }}
+                              >
+                                <SkillIcon
+                                  name={item}
+                                  icon={cat.icon}
+                                  color={cat.color}
+                                  size={32}
+                                  delay={0}
+                                />
+                                <span className="desktop-skill-name">{item}</span>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
                       </div>
                     ))}
                   </motion.div>

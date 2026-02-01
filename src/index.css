@@ -13,6 +13,8 @@
   --neon-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
   --font-mono: 'JetBrains Mono', monospace;
   --font-hud: 'Rajdhani', sans-serif;
+  --primary-rgb: 99, 102, 241;
+  --secondary-rgb: 168, 85, 247;
 }
 
 [data-theme='nebula'] {
