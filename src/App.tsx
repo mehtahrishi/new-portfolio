@@ -1267,9 +1267,9 @@ const SkillsSection = () => {
                     <motion.div
                       key={cat.title}
                       className="mobile-skill-card glass-card"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
+                      initial={{ opacity: 0, x: idx % 2 === 0 ? -50 : 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1, type: "spring", stiffness: 100, damping: 15 }}
                       viewport={{ once: true }}
                       style={{ '--cat-color': cat.color } as any}
                     >
@@ -1977,7 +1977,7 @@ const ExperienceSection = () => {
     if (isAnimating && revealedCount < experiences.length) {
       const timer = setTimeout(() => {
         setRevealedCount(prev => prev + 1);
-      }, 1500);
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [revealedCount, isAnimating, experiences.length]);
@@ -1992,6 +1992,7 @@ const ExperienceSection = () => {
       <motion.div
         className="staircase-wrapper"
         onViewportEnter={() => setIsAnimating(true)}
+        viewport={{ once: true, amount: 0.1 }}
       >
         <div className="staircase-svg-container">
           <svg width="100%" height="100%" viewBox="0 0 1000 250" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
@@ -2007,7 +2008,7 @@ const ExperienceSection = () => {
               animate={{
                 pathLength: Math.min(1, (revealedCount + 1) / experiences.length)
               }}
-              transition={{ duration: 1, ease: "linear" }}
+              transition={{ duration: 0.6, ease: "linear" }}
             />
             <motion.path
               d="M 0 125 L 100 175 L 300 75 L 500 175 L 700 75 L 900 175 L 1000 125"
@@ -2021,8 +2022,8 @@ const ExperienceSection = () => {
                 opacity: [0.2, 1, 0.2]
               }}
               transition={{
-                pathLength: { duration: 1, ease: "linear" },
-                opacity: { repeat: Infinity, duration: 2 }
+                pathLength: { duration: 0.6, ease: "linear" },
+                opacity: { repeat: Infinity, duration: 1.5 }
               }}
               style={{ filter: 'drop-shadow(0 0 10px var(--primary))' }}
             />
@@ -2033,7 +2034,7 @@ const ExperienceSection = () => {
                 y: currentPoint.y,
                 rotate: shipRotation
               }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
             >
               <foreignObject x="-20" y="-20" width="40" height="40">
                 <motion.div
@@ -2086,11 +2087,29 @@ const ExperienceSection = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ type: "spring", stiffness: 100, damping: 15 }}
                     >
-                      <div className={`stair-card glass-card ${isCurrent ? 'full' : 'mini'}`}>
-                        <h3>{exp.role}</h3>
-                        <h4>{exp.company}</h4>
-                        <p className="stair-desc">{exp.desc}</p>
-                      </div>
+                      {position === 'above' ? (
+                        <>
+                          <div className="stair-duration-card glass-card">
+                            <span className="duration-text">{exp.period}</span>
+                          </div>
+                          <div className={`stair-card glass-card ${isCurrent ? 'full' : 'mini'}`}>
+                            <h3>{exp.role}</h3>
+                            <h4>{exp.company}</h4>
+                            <p className="stair-desc">{exp.desc}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className={`stair-card glass-card ${isCurrent ? 'full' : 'mini'}`}>
+                            <h3>{exp.role}</h3>
+                            <h4>{exp.company}</h4>
+                            <p className="stair-desc">{exp.desc}</p>
+                          </div>
+                          <div className="stair-duration-card glass-card">
+                            <span className="duration-text">{exp.period}</span>
+                          </div>
+                        </>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

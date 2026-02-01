@@ -2058,6 +2058,33 @@ section {
     background: rgba(10, 15, 28, 0.9);
     backdrop-filter: blur(20px);
     border-radius: 12px;
+    margin: 0.5rem 0;
+  }
+
+  .stair-duration-card {
+    padding: 0.75rem 1rem;
+    position: relative;
+    border: 1.5px solid rgba(var(--primary-rgb), 0.4);
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.15), rgba(var(--primary-rgb), 0.05));
+    backdrop-filter: blur(20px);
+    border-radius: 8px;
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+
+  .duration-text {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.5);
+  }
+
+  .stair-card-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
   .stair-card.mini {
