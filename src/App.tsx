@@ -1139,6 +1139,7 @@ const SkillsSection = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [phase, setPhase] = useState<'idle' | 'loading' | 'revealed'>('idle');
+  const [skillPositions, setSkillPositions] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 850);
@@ -1153,6 +1154,42 @@ const SkillsSection = () => {
       return () => clearTimeout(timer);
     }
   }, [phase]);
+
+  // Animate skill position swaps
+  useEffect(() => {
+    if (phase !== 'revealed' || isMobile) return;
+
+    const interval = setInterval(() => {
+      const currentCategories = pages[currentPage].categories;
+      
+      setSkillPositions(prev => {
+        const newPositions = { ...prev };
+        
+        currentCategories.forEach((cat, catIdx) => {
+          const itemCount = cat.items.length;
+          if (itemCount < 2) return;
+          
+          // Pick two random indices to swap
+          const idx1 = Math.floor(Math.random() * itemCount);
+          let idx2 = Math.floor(Math.random() * itemCount);
+          while (idx2 === idx1) idx2 = Math.floor(Math.random() * itemCount);
+          
+          const key1 = `page${currentPage}-cat${catIdx}-${idx1}`;
+          const key2 = `page${currentPage}-cat${catIdx}-${idx2}`;
+          
+          const pos1 = newPositions[key1] ?? idx1;
+          const pos2 = newPositions[key2] ?? idx2;
+          
+          newPositions[key1] = pos2;
+          newPositions[key2] = pos1;
+        });
+        
+        return newPositions;
+      });
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [phase, currentPage, isMobile]);
 
   const categories = SKILLS_CATEGORIES;
 
@@ -1300,10 +1337,16 @@ const SkillsSection = () => {
                               }
                               
                               return connections.map(targetIdx => {
-                                const col1 = idx % 3;
-                                const row1 = Math.floor(idx / 3);
-                                const col2 = targetIdx % 3;
-                                const row2 = Math.floor(targetIdx / 3);
+                                const posKey1 = `page${currentPage}-cat${i}-${idx}`;
+                                const posKey2 = `page${currentPage}-cat${i}-${targetIdx}`;
+                                
+                                const visualPos1 = skillPositions[posKey1] ?? idx;
+                                const visualPos2 = skillPositions[posKey2] ?? targetIdx;
+                                
+                                const col1 = visualPos1 % 3;
+                                const row1 = Math.floor(visualPos1 / 3);
+                                const col2 = visualPos2 % 3;
+                                const row2 = Math.floor(visualPos2 / 3);
                                 
                                 // Calculate positions (approximate grid positions)
                                 const x1 = (col1 + 0.5) * 33.33;
@@ -1312,11 +1355,18 @@ const SkillsSection = () => {
                                 const y2 = (row2 + 0.5) * (100 / Math.ceil(cat.items.length / 3));
                                 
                                 return (
-                                  <line
+                                  <motion.line
                                     key={`${idx}-${targetIdx}`}
                                     className="connection-line"
                                     data-source={idx}
                                     data-target={targetIdx}
+                                    animate={{
+                                      x1: `${x1}%`,
+                                      y1: `${y1}%`,
+                                      x2: `${x2}%`,
+                                      y2: `${y2}%`
+                                    }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     x1={`${x1}%`}
                                     y1={`${y1}%`}
                                     x2={`${x2}%`}
@@ -1328,16 +1378,33 @@ const SkillsSection = () => {
                           </svg>
                           
                           {cat.items.map((item, idx) => {
-                            const baseDelay = i === 1 ? pages[currentPage].categories[0].items.length * 0.08 : 0;
+                            const positionKey = `page${currentPage}-cat${i}-${idx}`;
+                            const visualPosition = skillPositions[positionKey] ?? idx;
+                            
+                            // Calculate grid position based on visual position
+                            const col = visualPosition % 3;
+                            const row = Math.floor(visualPosition / 3);
                             
                             return (
                               <motion.div
                                 key={item.name}
                                 className="desktop-skill-item"
                                 data-skill-idx={idx}
+                                layout
+                                transition={{ 
+                                  layout: { type: "spring", stiffness: 300, damping: 30 },
+                                  opacity: { duration: 0.3 }
+                                }}
                                 initial={{ opacity: 0, scale: 0 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: baseDelay + (idx * 0.08), type: "spring" }}
+                                animate={{
+                                  gridColumn: col + 1,
+                                  gridRow: row + 1
+                                }}
+                                style={{
+                                  gridColumn: col + 1,
+                                  gridRow: row + 1
+                                }}
                                 viewport={{ once: true }}
                                 onMouseEnter={(e) => {
                                   const skillItem = e.currentTarget;
