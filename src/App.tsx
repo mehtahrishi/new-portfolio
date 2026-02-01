@@ -1210,6 +1210,40 @@ const InfiniteSkillLoop = ({ items, direction = 'left', color, icon, orientation
   );
 };
 
+const MobileSkillTag = ({ name, icon: FallbackIcon, color, delay }: { name: string; icon: any; color: string; delay: number }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  const handleViewportEnter = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (currentIndex <= name.length) {
+          setDisplayText(name.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 50);
+    }
+  };
+
+  return (
+    <motion.div
+      className="mobile-skill-tag"
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ delay }}
+      viewport={{ once: true }}
+      onViewportEnter={handleViewportEnter}
+    >
+      <SkillIcon name={name} icon={FallbackIcon} color={color} size={28} delay={0} />
+      <span className="mobile-skill-name">{displayText}</span>
+    </motion.div>
+  );
+};
+
 const SkillsSection = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -1295,53 +1329,35 @@ const SkillsSection = () => {
               style={{ width: '100%', height: '100%' }}
             >
               {isMobile ? (
-                (() => {
-                  const DevOpsIcon = SKILLS_CATEGORIES[0].icon;
-                  const WebIcon = SKILLS_CATEGORIES[1].icon;
-                  const DatabaseIcon = SKILLS_CATEGORIES[3].icon;
-                  const AIIcon = SKILLS_CATEGORIES[2].icon;
-
-                  return (
-                    <div className="mobile-engine-layout">
-                      {/* Top Row: DevOps */}
-                      <div className="engine-row">
-                        <div className="engine-label-wrap">
-                          <DevOpsIcon size={16} style={{ color: SKILLS_CATEGORIES[0].color }} />
-                          <span style={{ color: SKILLS_CATEGORIES[0].color }}>{SKILLS_CATEGORIES[0].title}</span>
-                        </div>
-                        <InfiniteSkillLoop items={SKILLS_CATEGORIES[0].items} direction="left" color={SKILLS_CATEGORIES[0].color} icon={DevOpsIcon} />
+                <div className="mobile-skills-grid">
+                  {SKILLS_CATEGORIES.map((cat, idx) => (
+                    <motion.div
+                      key={cat.title}
+                      className="mobile-skill-card glass-card"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      viewport={{ once: true }}
+                      style={{ '--cat-color': cat.color } as any}
+                    >
+                      <div className="mobile-skill-header">
+                        <cat.icon size={24} style={{ color: cat.color }} />
+                        <h3>{cat.title}</h3>
                       </div>
-
-                      {/* Middle: 2 Columns */}
-                      <div className="engine-mid-section">
-                        <div className="engine-col">
-                          <div className="engine-label-wrap vertical">
-                            <WebIcon size={16} style={{ color: SKILLS_CATEGORIES[1].color }} />
-                            <span style={{ color: SKILLS_CATEGORIES[1].color }}>{SKILLS_CATEGORIES[1].title}</span>
-                          </div>
-                          <InfiniteSkillLoop items={SKILLS_CATEGORIES[1].items} direction="down" color={SKILLS_CATEGORIES[1].color} icon={WebIcon} orientation="vertical" />
-                        </div>
-
-                        <div className="engine-col">
-                          <div className="engine-label-wrap vertical">
-                            <DatabaseIcon size={16} style={{ color: SKILLS_CATEGORIES[3].color }} />
-                            <span style={{ color: SKILLS_CATEGORIES[3].color }}>{SKILLS_CATEGORIES[3].title}</span>
-                          </div>
-                          <InfiniteSkillLoop items={SKILLS_CATEGORIES[3].items} direction="up" color={SKILLS_CATEGORIES[3].color} icon={DatabaseIcon} orientation="vertical" />
-                        </div>
+                      <div className="mobile-skill-tags">
+                        {cat.items.map((item, i) => (
+                          <MobileSkillTag
+                            key={item}
+                            name={item}
+                            icon={cat.icon}
+                            color={cat.color}
+                            delay={idx * 0.1 + i * 0.05}
+                          />
+                        ))}
                       </div>
-
-                      {/* Bottom Row: AI */}
-                      <div className="engine-row">
-                        <div className="engine-label-wrap">
-                          <AIIcon size={16} style={{ color: SKILLS_CATEGORIES[2].color }} />
-                          <span style={{ color: SKILLS_CATEGORIES[2].color }}>{SKILLS_CATEGORIES[2].title}</span>
-                        </div>
-                        <InfiniteSkillLoop items={SKILLS_CATEGORIES[2].items} direction="right" color={SKILLS_CATEGORIES[2].color} icon={AIIcon} />
-                      </div>
-                    </div>
-                  );
-                })()
+                    </motion.div>
+                  ))}
+                </div>
               ) : (
                 <>
                   <motion.div

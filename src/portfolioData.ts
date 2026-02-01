@@ -11,31 +11,38 @@ import {
 export const SKILLS_CATEGORIES = [
     {
         title: "Dev Operations",
-        items: ["Git", "Docker", "Kubernetes", "AWS", "CI/CD", "Nginx", "GCP", "Apache", "Bash", "Linux", "Prometheus", "Redis"],
+        items: ["Git", "GitHub", "Docker", "Kubernetes", "AWS", "CI/CD", "Nginx", "GCP", "Linux"],
         icon: Server,
         color: "#6366f1",
         direction: 'left' as const
     },
     {
-        title: "Full Stack Development",
-        items: ["ReactJS", "NextJS", "TypeScript", "NodeJS", "ExpressJS", "Tailwind CSS", "Framer Motion", "Python", "Flask", "JS", "HTML", "CSS", "Postman", "Puppeteer"],
+        title: "Frontend",
+        items: ["React JS", "Redux", "NextJS", "HTML", "CSS", "JavaScript", "TypeScript", "Bootstrap", "Tailwind CSS"],
         icon: Code2,
         color: "#22d3ee",
         direction: 'right' as const
     },
     {
-        title: "AI Tools",
-        items: ["Copilot", "Claude", "Gemini", "Groq", "n8n", "Firebase Studio", "OpenAI"],
+        title: "AI/ML",
+        items: ["PyTorch", "TensorFlow", "Scikit-learn", "Pandas", "NumPy", "Matplotlib"],
         icon: Brain,
         color: "#10b981",
         direction: 'left' as const
     },
     {
         title: "Databases",
-        items: ["Neo4j", "MongoDB", "PostgreSQL", "SQL", "Appwrite", "Drizzle ORM"],
+        items: ["Neo4j", "MongoDB", "PostgreSQL", "MySQL", "Appwrite", "Drizzle ORM"],
         icon: Database,
         color: "#ec4899",
         direction: 'right' as const
+    },
+    {
+        title: "Backend",
+        items: ["Python", "Flask", "Node JS", "Express JS", "Puppeteer", "Postman"],
+        icon: Server,
+        color: "#f59e0b",
+        direction: 'left' as const
     }
 ];
 
